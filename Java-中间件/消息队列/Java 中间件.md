@@ -14,19 +14,48 @@
 
   + **综述**
 
-    > 
+    > 1. 一个 `Cluster` 由多个 `Broker` 组成
 
 + **Broker ( 服务器 )**
 
+  ![broker](Java%20%E4%B8%AD%E9%97%B4%E4%BB%B6.assets/broker.png)
+
+  + **综述**
+
+    > 1. 一个 `Broker` 一般在 `一台机器` 上
+    > 2. 一个 `Broker` 由一个或多个 `Topic` 组成
+    > 3. `Broker` 负责 `处理请求( 消费者, 生产者, 元数据 )` 和 `维护数据备份`
+
 + **Topic ( 主题 )**
+
+  ![Topic](Java%20%E4%B8%AD%E9%97%B4%E4%BB%B6.assets/Topic.png)
+
+  + 综述
+
+    > 1. 负责 `保存数据`
+    > 2. 生产者和消费者将数据 `写入 Topic`
+    > 3. 数据不能主动删除, 只能通过 `新建同名 Topic` 删除数据
+    > 4. `Topic` 负责维护 `Consumer` 的读写记录( 位置 ), `Consumer` 可以 `自主选择` 读写的位置
 
 + **Partition( 分区 )**
 
-+ **Consumer Group( 消费者组 )**
+  ![Partition](Java%20%E4%B8%AD%E9%97%B4%E4%BB%B6.assets/Partition.png)
 
-+ **Producer Strategy( 生产者策略 )**
+  + **综述**
 
-+ **Consumer Strategy( 消费者策略 )**
+    > 1. 一个 `Topic` 由一个或多个 `Partition` 组成
+    > 2. `Partition` 内使用 `队列` 储存数据
+    > 3. `Partiton` 存在 `Leader( 主 )` 和 `Followers( 从 )`. 主分区负责 `读写`, 从分区负责从主分区 `同步信息`
+    > 4. 当 `主分区` 失效时, `zookeeper` 会推举出主分区, 所以尝试将主分区 `分布在不同的 Broker 上`
+
+  + **Consumer Group( 消费者组 )**
+
+    > 1. `一个 Partiton` 只能被 `一个 Consumer Group` 里面的`一个 Consumer` 消费
+    > 2. 但是`一个 Consumer Group`里面的 `一个 Consumer` 可以同时消费 `几个 Partition`
+
+  + **Producer Strategy( 生产者策略 )**
+
+  + **Consumer Strategy( 消费者策略 )**
 
 + **队列( Queue ) 和 广播( Pub/Sub )**
 
