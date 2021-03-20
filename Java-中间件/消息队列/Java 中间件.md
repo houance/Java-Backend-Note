@@ -8,6 +8,26 @@
 
   > `Kafka` 是一个 `分布式` 的 `流数据` 处理平台
 
++ **Cluster( 集群 )**
+
+  ![cluster](Java%20%E4%B8%AD%E9%97%B4%E4%BB%B6.assets/cluster.png)
+
+  + **综述**
+
+    > 
+
++ **Broker ( 服务器 )**
+
++ **Topic ( 主题 )**
+
++ **Partition( 分区 )**
+
++ **Consumer Group( 消费者组 )**
+
++ **Producer Strategy( 生产者策略 )**
+
++ **Consumer Strategy( 消费者策略 )**
+
 + **队列( Queue ) 和 广播( Pub/Sub )**
 
   > `Kafka` 可以实现 `队列和广播` 两种消息模式
@@ -40,3 +60,4 @@
     > 1. `Zookeeper` 用于 `维护信息` , `统一命名` , `分布式同步` 和提供 `组服务(新版本中由 Kafka 自己实现了)`
 
   + 
+
