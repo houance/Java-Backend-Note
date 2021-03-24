@@ -2,9 +2,11 @@
 
 [toc]
 
+## 1.什么是 Persistence ( 持久层 )
 
+> 1. `Persistence` 是指将 `数据` 存储起来( 一般存到 磁盘 或者数据库 ), 以便再次使用.
 
-## 1. 什么是 JDBC( Java-Database-Connectity )
+## 2. 什么是 JDBC( Java-Database-Connectity )
 
 + **综述**
 
@@ -15,7 +17,7 @@
 
   
 
-## 2. 什么是 ORM ( Object-Realation-Mapping)
+## 3. 什么是 ORM ( Object-Realation-Mapping)
 
 + **Object 储存数据的方式**
 
@@ -40,15 +42,32 @@
 
   > 1. `ORM( Object-Realation-Mapping )` 就是为了解决 `OO( Object-Oriented )` 编程语言与 `Realation-DB` 之间交互存在的问题
   > 2. 问题举例 : `数据类型转换( bigint--Long, varchar--string )`, `复杂的查询动作( Join, Merge ...... )`, 对象之间的依赖关系与 `表的映射 ( Mapping ) `等等
-  > 3. 底层是对 `JDBC` 的封装, 提供了完备的 `ORM` 方法, 简化的数据库的使用.
 
-## 3. 什么是 Mybatis 
+## 4. Mybatis vs Hibernate/JPA
 
-## 4. 什么是 Hibernate 和 JPA
++ **Mybatis**
 
-## 5. Mybatis vs Hibernate
+  ![Screenshot from 2021-03-25 00-15-54](Mybatis-%E6%8C%81%E4%B9%85%E5%B1%82%E6%A1%86%E6%9E%B6.assets/Screenshot%20from%202021-03-25%2000-15-54.png)
 
-## 6. 使用 Mybatis
+  + **综述**
+
+    > 1. `Mybatis` 是一款 `ORM + Persistence` 框架
+    > 2. 需要用户自己写 `SQL`, 可以自己优化 `SQL`, 最大化性能
+    > 3. 底层封装了 `JDBC`, 省去了 `连接数据库, 转换参数, 异常检查` 等繁琐语句.
+    > 4. 拥有数据库`连接池`, 减小数据库连接开销
+    > 5. 自带`缓存机制`, 可以将之前查询的结果`存储在内存`
+
++ **什么是 Hibernate/JPA**
+
+  ![Screenshot from 2021-03-25 00-16-02](Mybatis-%E6%8C%81%E4%B9%85%E5%B1%82%E6%A1%86%E6%9E%B6.assets/Screenshot%20from%202021-03-25%2000-16-02.png)
+
+  + **综述**
+
+    > 1. `Hibernate` 是一款 `ORM + Persistence` 框架
+    > 2. 不需要用户自己写 `SQL` ,全部操作都通过 `OO` 的方式
+    > 3. 符合 `JPA( Java Persistence API )` 规范, 即用户可以随时使用其他符合 `JPA` 的框架, 不需要更改代码.
+
+## 5. 使用 Mybatis
 
 
 
