@@ -1,6 +1,176 @@
 # Java
 
-[toc]
+## 1. Java SE(Java Platform , Standard Edition)
 
-## 1. JavaSE (Java Platform , Standard Edition)
+### 1.1 static 修饰符
 
++ **综述**
+
+  > 1. `static` 修饰的东西, 只会在`类加载`的时候初始化一次
+  > 2. 常被用于 `不需要创建对象`即可使用类方法和访问类变量
+  > 3. `static` 修饰的变量是可以修改的, 通常需要加 `final` 一起用
+
++ **修饰方法**
+
+  > 1. 静态方法没有 `this` 指针
+  > 2. 静态方法内无法调用`非静态的变量和方法`, 反过来可以. 因为非静态的变量和方法在`创建对象`的时候才会`初始化`
+
++ **修饰变量**
+
+  > 1. 静态变量在内存中`只有一份`, 在`类加载` 的时候创建并初始化
+  >
+  > 2. 多个`对象` 共享一个`静态变量`
+  >
+  >    > <img src="Java.assets/static.png" alt="static" style="zoom:150%;" />
+
++ **修饰代码块**
+
+  > 1. `static` 也可以一次修饰多个语句, 常用于`批量初始化`变量
+  >
+  >    > ```java
+  >    > class Test{
+  >    >     private static final Integer a, b;
+  >    >     static {
+  >    >         a = 1;
+  >    >         b = 2;
+  >    >     }
+  >    >     // 其他代码
+  >    > }
+  >    > ```
+
+---
+
+### 1.2 堆内存和栈内存
+
++ **综述**
+
+  > 1. `堆内存`保存的是`对象的具体信息`, 通过关键字 `new` 开辟空间
+  >
+  > 2. `栈内存`保存的是一块`堆内存`的`地址`, 即保存 `引用`
+  >
+  > 3. `对象创建`和`引用传递`
+  >
+  >    ![1](Java.assets/1.png)
+  >
+  >    <img src="Java.assets/Screenshot%20from%202021-03-29%2019-28-40.png" alt="Screenshot from 2021-03-29 19-28-40" style="zoom:150%;" />
+
+---
+
+### 1.3 垃圾空间
+
++ **综述**
+
+  > 1. `垃圾空间` 是指没有任何`栈内存指向`的`堆内存空间`
+  > 2. `垃圾空间` 会被 `GC(Garbage Collector)` 定期回收
+
+### 1.4 对象向上和向下转型
+
++ **向上转型**
+
+  + **例子**
+
+    > ```java
+    > // class Apple extend Fruit
+    > Fruit fruit = new Apple();
+    > ```
+    >
+    > 1. 此时 `fruit` 引用了 `Fruit` 的子类, 称为向上转型
+    > 2. `fruit` 可以调用 `Apple 类` 中属于 `Fruit 类` 的属性和方法`( 如果方法被重写, 那么调用的是重写后的方法 )`.
+    > 3. `fruit` 无法调用 `Apple 类` 中不属于 `Fruit 类` 的属性和方法
+
+  + **应用**
+
+    > ```java
+    > //class Apple extend Fruit
+    > class Test{
+    >     public void main(){
+    >         run(new Fruit());
+    >         run(new Apple());
+    >     }
+    >     
+    >     private void run(Fruit fruit){
+    >         fruit.anymethod();
+    >     }
+    >     
+    > }
+    > ```
+    >
+    > 1. 上述例子通过 `向上转型` , 省去了 `run` 方法的重载.
+
++ **向下转型**
+
+  + **例子**
+
+    > ```java
+    > // class Apple,Orange extend Fruit
+    > Fruit fruit = new Apple(); //向上转型
+    > Apple apple = (Apple) fruit; // (Apple) fruit 称为向下转型, 不会报错
+    > 
+    > Fruit fruit = new Apple();// 向上转型
+    > Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
+    > ```
+
+### 1.5 泛型( Generics )
+
++ **综述**
+
+  > 1. `泛型` 是指 类, 接口或者方法使用 `类型(Types)` 进行初始化, 通常用于编写 `集合/容器` 类.
+
+  > 1. `Java` 着重于`类型安全(Type Safe)`, 大部分 `类型错误` 会在`编译期`被发现, 但是如果使用`强制类型转换`, 这种错误很难在编译期发现.  
+  > 2. `Java 5` 之前, 一般使用 `Object` 实现 `泛型` 功能, 但是需要使用 `强制类型转换`, 带来很大的 `安全隐患`.
+  > 3. `Java 5` 之后, 引入 `<>` 的方法, 在编译期就可以发现`类型错误`.
+
++ **例子**
+
+  > 1. **泛型类**
+  >
+  >    > ```java
+  >    > public class Test<T> {
+  >    >     private T val;
+  >    >     
+  >    >     public T getVal() {
+  >    >         return val;
+  >    >     }
+  >    >     public T setVal(T val) {
+  >    >         this.val = val;
+  >    >     }
+  >    > }
+  >    > ```
+  >    >
+  >    > 
+  >
+  > 2. **泛型方法**
+  >
+  >    > ```java
+  >    > // <Class> 是使用泛型的类(多是集合)
+  >    > public <T> <Class><T> print(Test<T> a, Test<T> b){}
+  >    > ```
+  >    >
+  >    > 
+
++ **通配符**
+
+  + **综述**
+
+    > 1. 通常用于 `泛型方法` 中传入参数
+
+  + **用法**
+
+    > 1. 上界通配符
+    >
+    >    <img src="Java.assets/upper%20bound.png" alt="upper bound" style="zoom:150%;" />
+    >
+    > 2. 下界通配符
+    >
+    >    <img src="Java.assets/lower%20bound.png" alt="lower bound" style="zoom:150%;" />
+
+  + **例子**
+
+    > ```java
+    > // <Class> 是使用泛型的类(多是集合)
+    > public <Class><? extends Number> print
+    >     (<Class><? extends Number> a, 
+    >      <Class><? extends Number> b)
+    > ```
+
+### 1.6 进程和线程
