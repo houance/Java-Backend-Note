@@ -221,9 +221,9 @@
      >    > 2. 被 **Synchronized** 修饰的**代码块**, 同一时间 `只有一个线程` 可以执行.
      >    > 3. 
      >
-     > 2. `Happen-Before` 原则 :  在 `线程 A` 执行 `Volatile Write/Synchronized Block` 之前的**变量更新**, 在 `线程 B` 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
+     > 2. **Happen-Before 原则** :  在 `线程 A` 执行 `Volatile Write/Synchronized Block` 之前的**变量更新**, 在 `线程 B` 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
      >
-     > 3. 总结的来说, **Happen-Before 原则** 是对 `JVM( JIT ) 指令优化` 的`限制`.
+     > 3. **总结的来说, Happen-Before 原则是对 `JVM( JIT ) 指令优化` 的`限制`.**
 
 ### 1.7 集合
 
