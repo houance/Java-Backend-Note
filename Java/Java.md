@@ -175,6 +175,56 @@
 
 ### 1.6 进程和线程
 
++ **线程**
+
+  1. **综述**
+
+     > 1. 线程之间共享的数据 : 在`主线程声明`的变量
+     >
+     > 2. 线程独有的数据 : 在`线程内声明`的变量
+     >
+     > 3. 线程有五种状态
+     >
+     >    <img src="Java.assets/states-1617293248986.png" alt="states" style="zoom:150%;" />
+     >
+     >    > 1. 调用 `new Thread()` 之后进入 `New`
+     >    >
+     >    > 2. 调用 `Thread.start()` 之后进入 `Runnable` , 随时接受 `CPU 调度`.
+     >    >
+     >    > 3. 接受 `CPU 调度` 后, 进入 `Running`
+     >    >
+     >    > 4. 线程暂时放弃 `CPU 的使用权` , 进入 `Blocked` , 其中 `Block` 分为三种
+     >    >
+     >    >    > 1. 调用 `Thread.wait()` 方法, 线程进入 `Wait Blocked`
+     >    >    > 2. 调用 `sleep() / join()` 方法, 或者发出 `I/O 请求` , 线程进入 `Other Blocked` . 当 `sleep()超时`、`join()等待的线程终止或者超时`,  `I/O处理完毕时`，线程进入 `Runnable` 
+     >    >    > 3. 线程获取 `Synchronized 锁` 失败, 进入 `Synchronized Blocked`
+     >    >
+     >    > 5. 执行完或者因为异常退出了 `Thread.run()` 方法, 则进入 `Dead`
+
+  2. **可能存在的问题**
+
+     > 1. 数据更新的`可见性 ( Visibilty )`
+     >
+     >    > 1.  `CPU 更新数据`的时机是`不确定的( 处理完之后不一定立即写入 RAM )`
+     >    > 2. 如果线程A `更新共享数据`到 **RAM** 之前, 线程B 从 **RAM** 中`读取了这个数据`, 则这个数据的`更新`对于 线程B 来说是 `不可见的`
+     >
+     > 2. 程序的 `执行顺序( Order )`
+     >
+     >    > 1. JVM( JIT ) 会进行 `指令优化`
+     >    > 2. 这可能会导致 `程序执行的顺序` 和 `CPU 最终执行指令的顺序`并`不一致`, 导致 `可见性` 被破坏
+
+  3. **解决的方法**
+
+     > 1. **Volatile** 和 **Synchronized** 和 **Lock**
+     >
+     >    > 1. 被 **Volatile** 修饰的**变量**的 `写操作` 会立即写入 `RAM` 中, 而 `读操作` 会从 `RAM` 中读取
+     >    > 2. 被 **Synchronized** 修饰的**代码块**, 同一时间 `只有一个线程` 可以执行.
+     >    > 3. 
+     >
+     > 2. `Happen-Before` 原则 :  在 `线程 A` 执行 `Volatile Write/Synchronized Block` 之前的**变量更新**, 在 `线程 B` 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
+     >
+     > 3. 总结的来说, **Happen-Before 原则** 是对 `JVM( JIT ) 指令优化` 的`限制`.
+
 ### 1.7 集合
 
 + **Collection**
@@ -183,7 +233,7 @@
 
     > 1. 全部`单值`存储容器都要 `实现的接口`
     >
-    > 2. Colection的 `CRUD` 示例 
+    > 2. Colection 的 `CRUD` 示例 
     >
     >    > ```java
     >    > <List/Set><String> list/set = New <Collection 实现类><>();
@@ -195,33 +245,32 @@
     >    > list.set(0,"A");//改
     >    > 
     >    > list.get(0);//查
-  >    > 
+    >    > 
     >    > Collections.sort(list);//排序, 字符串根据 ASCII
-  >    > Collections.max(list);// 找到最大值
+    >    > Collections.max(list);// 找到最大值
     >    > Collections.min(list);// 找到最小值
-  >    > 
+    >    > 
     >    > //for-each遍历, 遍历中无法删除元素
     >    > for (String s: list/set){
-    >    >  System.out.println(s);
+    >    > System.out.println(s);
     >    > }
     >    > 
     >    > //迭代器遍历, 遍历中可以删除元素
     >    > Iterator<String> iterator = list/set.iteator();
     >    > while (iterator.hasNext()){
-    >    >     iterator.next();
-    >    >     iterator.remove(); //使用迭代器删除元素
+    >    >  iterator.next();
+    >    >  iterator.remove(); //使用迭代器删除元素
     >    > }
     >    > 
     >    > //输出全部值
     >    > System.out.println(list/set);
     >    > ```
-    >
-    > 3. 单线程 `迭代` 的过程使用 `<Collection 实现类>.remove()` 会出现并发更新异常. 需要使用 `Iterator.remove()` .
-  
+    > 3. 单线程 `迭代` 的过程使用 `<Collection 实现类>.remove()` 会出现并发更新异常. 需要使用 `Iterator.remove()` 
+
   + **List**
-  
+
     0. **综述**
-  
+
        > 1. 元素`有序存储`
        >
        >    > 1. 元素`存储顺序`和 `插入顺序` 一致
@@ -237,9 +286,9 @@
     
        > 1. 底层数据结构是`链表`, 线程不安全
          > 2. 没有 `动态扩容`
-  
+
     2. **ArrayList**
-  
+
        + **综述**
     
        > 1. 底层数据结构是`数组` , 线程不安全
@@ -247,11 +296,11 @@
        > 3. 空间不足的时候, 扩容 `现有空间 / 2`的大小, 然后进行数据搬移.
     
   3. **Vector**
-    
+     
        + **综述**
-    
+       
        > 1. 底层数据结构是`数组`, 线程安全
-    
+
 + **Set**
   
   0. **Set 综述**
@@ -298,7 +347,7 @@
   
     > 1. 用来存储 `<Key:Value>` 数据
     >
-    > 2. **CRUD**
+    > 2. Map 的**CRUD**
     >
     >    > ```java
     >    > Map<Integer,String> map = new <Map 实现类>();
@@ -334,3 +383,39 @@
   + **TreeMap**
   
   + 
+
+### 1.8 JVM ( Java Virtual Machine )
+
+1. **JVM 的内存模型 ( 线程的角度 )**
+
+   + **结构**
+
+     ![neicunmoxin](Java.assets/neicunmoxin.png)
+
+   + **综述**
+
+     > 1. `堆` 是**全部线程**和 **CPU核心** `共用`的, 存放的是变量`具体的值`
+     >
+     > 2. `栈` 是`线程独有`的, 存放的是在`线程内声明` 的变量的`引用`, 存放堆中对应的内存地址
+     >
+     > 3. 多线程下的内存模型 : 每个线程都有`自己的 CPU`,  RAM 是`全部线程共用`的.
+     >
+     > 4. `CPU` 处理数据流程
+     >
+     >    > 1. `CPU 处理单元` 从`缓存`取数据到`寄存器`
+     >    > 2. 没有则从 `RAM( 栈-->堆 )` 中`复制`一份数据到`CPU ( 缓存 --> 寄存器)`中
+     >    > 3. `CPU 计算单元`处理完之后`更新堆中的数据
+
+2. **JVM 指令优化**
+
+   + **指令并行优化**
+
+     > 1. CPU 指令`并行优化`
+     >
+     >    > 1. CPU 会从`待执行的指令队列`中找出 `可以并行`的指令 
+     >    > 2. 将`可以并行` 的指令放在不同的流水线执行, 加速 **CPU** 运行速度.
+     >
+     > 2. JVM( JIT ) 指令 `并行优化`
+     >
+     >    > 1. JVM ( JIT ) 在`编译阶段`找出`可以并行`的指令
+     >    > 2. 将指令`重新排序`之后再输入 **CPU**
