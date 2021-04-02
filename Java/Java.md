@@ -173,57 +173,147 @@
     >      <Class><? extends Number> b)
     > ```
 
-### 1.6 进程和线程
+### 1.6 线程
 
-+ **线程**
+1. **综述**
 
-  1. **综述**
+   > 1. 线程之间共享的数据 : 在`主线程声明`的变量
+   >
+   > 2. 线程独有的数据 : 在`线程内声明`的变量
+   >
+   > 3. 线程有五种状态
+   >
+   >    <img src="Java.assets/states-1617293248986.png" alt="states" style="zoom:150%;" />
+   >
+   >    > 1. 调用 `new Thread()` 之后进入 `New`
+   >    >
+   >    > 2. 调用 `Thread.start()` 之后进入 `Runnable` , 随时接受 `CPU 调度`.
+   >    >
+   >    > 3. 接受 `CPU 调度` 后, 进入 `Running`
+   >    >
+   >    > 4. 线程暂时放弃 `CPU 的使用权` , 进入 `Blocked` , 其中 `Block` 分为三种
+   >    >
+   >    >    > 1. 调用 `Thread.wait()` 方法, 线程进入 `Wait Blocked`
+   >    >    > 2. 调用 `sleep() / join()` 方法, 或者发出 `I/O 请求` , 线程进入 `Other Blocked` . 当 `sleep()超时`、`join()等待的线程终止或者超时`,  `I/O处理完毕时`，线程进入 `Runnable` 
+   >    >    > 3. 线程获取 `Synchronized 锁` 失败, 进入 `Synchronized Blocked`
+   >    >
+   >    > 5. 执行完或者因为异常退出了 `Thread.run()` 方法, 则进入 `Dead`
 
-     > 1. 线程之间共享的数据 : 在`主线程声明`的变量
+2. **可能存在的问题**
+
+   > 1. **竞争态势 ( Race Condition )**
+   >
+   >    > 1. 多个线程 `Check Then Act`
+   >    >
+   >    > 2. 多个线程 `Read Modify Write`
+   >    >
+   >    > 3. 多个线程 `不以原子性的形式` 访问数据
+   >    >
+   >    > 4. 数据更新的`可见性 ( Visibilty )`
+   >    >
+   >    >    > 1.  `CPU 更新数据`的时机是`不确定的( 处理完之后不一定立即写入 RAM )`
+   >    >    > 2.  如果线程A `更新共享数据`到 **RAM** 之前, 线程B 从 **RAM** 中`读取了这个数据`, 则这个数据的`更新`对于 线程B 来说是 `不可见的`
+   >
+   > 2. 程序的 `执行顺序( Order )`
+   >
+   >    > 1. JVM( JIT ) 会进行 `指令优化`
+   >    > 2. 这可能会导致 `程序执行的顺序` 和 `CPU 最终执行指令的顺序`并`不一致`, 导致 `可见性` 被破坏
+
+3. **解决的方法**
+
+   > 1. **Volatile** 和 **Synchronized** 和 **Lock**
+   >
+   > 2. **Happen-Before 原则** :  
+   >
+   >    > 1. 在 **线程 A** 执行 `Volatile Write/Synchronized Block` 之前的`变量更新`, 在 **线程 B** 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
+   >    > 2. **Volatile Write/Synchronized Unlock** `总是发生在` **Volatile Read/Synchronized Lock** `之前`
+   >
+   > 3. **总结的来说, Happen-Before 原则是对 `JVM( JIT ) 指令优化` 的`限制`.**
+
+4. **Volatile**
+
+   + **综述**
+
+     > 1. **CRUD**
      >
-     > 2. 线程独有的数据 : 在`线程内声明`的变量
+     >    > ```java
+     >    > volatile int count = 0;
+     >    > ```
      >
-     > 3. 线程有五种状态
+     > 2. **Volatile** 不保证 `原子性` 
      >
-     >    <img src="Java.assets/states-1617293248986.png" alt="states" style="zoom:150%;" />
-     >
-     >    > 1. 调用 `new Thread()` 之后进入 `New`
+     >    > ```java
+     >    > public class Counter{
+     >    >    private volatile int counter = 0;
+     >    > 
+     >    >    public void setCounter(int value)	{
+     >    >         counter++;
+     >    > 	}
+     >    > }
+     >    > ```
      >    >
-     >    > 2. 调用 `Thread.start()` 之后进入 `Runnable` , 随时接受 `CPU 调度`.
-     >    >
-     >    > 3. 接受 `CPU 调度` 后, 进入 `Running`
-     >    >
-     >    > 4. 线程暂时放弃 `CPU 的使用权` , 进入 `Blocked` , 其中 `Block` 分为三种
-     >    >
-     >    >    > 1. 调用 `Thread.wait()` 方法, 线程进入 `Wait Blocked`
-     >    >    > 2. 调用 `sleep() / join()` 方法, 或者发出 `I/O 请求` , 线程进入 `Other Blocked` . 当 `sleep()超时`、`join()等待的线程终止或者超时`,  `I/O处理完毕时`，线程进入 `Runnable` 
-     >    >    > 3. 线程获取 `Synchronized 锁` 失败, 进入 `Synchronized Blocked`
-     >    >
-     >    > 5. 执行完或者因为异常退出了 `Thread.run()` 方法, 则进入 `Dead`
+     >    > > 此时如果多个线程拿到 **counter 变量**并调用 **setCounter** , 则 **counter 变量** 从 0 增加到 1, `而不是从 0 增加到 2`.
 
-  2. **可能存在的问题**
+5. **Synchronized**
 
-     > 1. 数据更新的`可见性 ( Visibilty )`
-     >
-     >    > 1.  `CPU 更新数据`的时机是`不确定的( 处理完之后不一定立即写入 RAM )`
-     >    > 2. 如果线程A `更新共享数据`到 **RAM** 之前, 线程B 从 **RAM** 中`读取了这个数据`, 则这个数据的`更新`对于 线程B 来说是 `不可见的`
-     >
-     > 2. 程序的 `执行顺序( Order )`
-     >
-     >    > 1. JVM( JIT ) 会进行 `指令优化`
-     >    > 2. 这可能会导致 `程序执行的顺序` 和 `CPU 最终执行指令的顺序`并`不一致`, 导致 `可见性` 被破坏
+   + **综述**
 
-  3. **解决的方法**
+     > 1. **CRUD**
+     >
+     >    > ```java
+     >    > synchronized (Object monitor){<synchronized block}
+     >    > ```
+     >    >
+     >    > 
+     >
+     > 2. **线程** 只有拿到 `monitor 对象` 才可以执行 `Synchronized Block` , 保证`同一时间` 只有`一个线程` 执行 `Synchronized Block`
+     >
+     > 3. **可重入性** : 拿到 `monitor 对象` 的线程可以执行 **同一** `monitor 对象` 的`全部代码块`
+     >
+     > 4. **原子性** : **Synchronized** 可以保证 **代码块** 的执行不会受到 `线程时间片轮询`的影响, 即从代码块的开始到结束, `不会切换`到其他线程.
 
-     > 1. **Volatile** 和 **Synchronized** 和 **Lock**
+   + **Monitor**
+
+     > 1. **Monitor 对象**的划定
      >
-     >    > 1. 被 **Volatile** 修饰的**变量**的 `写操作` 会立即写入 `RAM` 中, 而 `读操作` 会从 `RAM` 中读取
-     >    > 2. 被 **Synchronized** 修饰的**代码块**, 同一时间 `只有一个线程` 可以执行.
-     >    > 3. 
+     >    > ```java
+     >    > // 此时 Monitor 是 classA 实例化的对象
+     >    > class classA{
+     >    >     public void synchronized method(){}
+     >    >     public void method(){
+     >    >         synchronized(this){}
+     >    >     }
+     >    > }
+     >    > 
+     >    > // 此时 Monitor 是 classA 类
+     >    > class classA{
+     >    >     private static field;
+     >    >     public static synchronized method(){}
+     >    >     public method(){
+     >    >         synchronized(classA.class){}
+     >    >     }
+     >    > }
+     >    > 
+     >    > // 上述两者可以混合使用
+     >    > ```
      >
-     > 2. **Happen-Before 原则** :  在 `线程 A` 执行 `Volatile Write/Synchronized Block` 之前的**变量更新**, 在 `线程 B` 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
+     >    
+
+6. **Lock**
+
+7. **ThreadLocal**
+
+   + **综述**
+
+     > 1. **ThreadLocal** 可以存放 `只属于` 某个线程的 `数据`
      >
-     > 3. **总结的来说, Happen-Before 原则是对 `JVM( JIT ) 指令优化` 的`限制`.**
+     > 2. **ThreadLocal** 通常用于**线程间**的` 数据隔离`
+     >
+     >    > 1. 为每个线程存放一个 **JDBC Connection**, 保证线程之间`不会关掉正在使用`的 **JDBC Connection**
+     >
+     > 3. **子线程** `可以拿到` **父线程** 的 `ThreadLocal 值`
+
+8. **Thread Pool**
 
 ### 1.7 集合
 
