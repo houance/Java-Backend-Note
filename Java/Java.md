@@ -225,7 +225,7 @@
    >
    > 2. **Happen-Before 原则** :  
    >
-   >    > 1. 在 **线程 A** 执行 `Volatile Write/Synchronized Block` 之前的`变量更新`, 在 **线程 B** 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 
+   >    > 1. 在 **线程 A** 执行 `Volatile Write/Synchronized Block` 之前的`变量更新`, 在 **线程 B** 执行 `Volatile Read/Synchronized Block` 之后都是`可见的`. 总的来说, 如果 `线程 A 新建了线程 B`, 则 `A 线程的变化总是 Happen Before 线程 B`.
    >    > 2. **Volatile Write/Synchronized Unlock** `总是发生在` **Volatile Read/Synchronized Lock** `之前`
    >
    > 3. **总结的来说, Happen-Before 原则是对 `JVM( JIT ) 指令优化` 的`限制`.**
@@ -271,6 +271,8 @@
      > 3. **可重入性** : 拿到 `monitor 对象` 的线程可以执行 **同一** `monitor 对象` 的`全部代码块`
      >
      > 4. **原子性** : **Synchronized** 可以保证 **代码块** 的执行不会受到 `线程时间片轮询`的影响, 即从代码块的开始到结束, `不会切换`到其他线程.
+     >
+     > 5. 不保证 `公平性`( 参考 **Starvation **问题)
 
    + **Monitor**
 
@@ -301,6 +303,39 @@
 
 6. **Lock**
 
+   + **结构**
+
+     <img src="Java.assets/Screenshot%20from%202021-04-05%2023-34-56.png" alt="Screenshot from 2021-04-05 23-34-56" style="zoom:150%;" />
+
+   + **综述**
+
+     > 1. 同一时间, 只有 `拿到锁` 的线程可以执行相关代码
+     >
+     > 2. 需要 `显式` 地开关锁
+     >
+     > 3. **CRUD**
+     >
+     >    > ```java
+     >    > 
+     >    > ```
+     >    >
+     >    > 
+
+   + **公平锁**
+
+     > 1. 多个线程 `同时等待锁` 的时候, 如果不能保证`先等待的线程`先得到锁 , 则可能会有线程 `永远陷入等待的情况`, 称这种状态为 `Starvation( 饥饿 )`
+     > 2. **公平锁** 保证`先等待`的线程`先得到锁`
+
+   + **读写锁**
+
+     > 1. 实现的 `读写线程分开`
+     > 2. 多个线程可以 `同时获得读锁`, 反过来不成立
+     > 3. **读写锁** `同一时间只有一个`可以被获得
+
+   + **可重入锁**
+
+     > 1. 获得锁的线程可以 `再次获得同一个锁`
+
 7. **ThreadLocal**
 
    + **综述**
@@ -313,7 +348,19 @@
      >
      > 3. **子线程** `可以拿到` **父线程** 的 `ThreadLocal 值`
 
-8. **Thread Pool**
+8. **ExecutorService( Thread Pool )**
+
+   + **结构**
+
+     + **Thread Pool**
+
+     <img src="Java.assets/Screenshot%20from%202021-04-05%2023-06-25.png" alt="Screenshot from 2021-04-05 23-06-25" style="zoom:150%;" />
+
+     + **ExecutorService**
+
+       <img src="Java.assets/Screenshot%20from%202021-04-06%2000-54-24.png" alt="Screenshot from 2021-04-06 00-54-24" style="zoom:150%;" />
+
+   + **综述**
 
 ### 1.7 集合
 
