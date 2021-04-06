@@ -387,12 +387,27 @@
        > 1. **CRUD**
        >
        >    > ```java
+       >    > ExecutorService executorService = 
+       >    > Executors.<ThreadPoolImplementation>();
        >    > 
+       >    > // Future 用于掌握任务执行情况
+       >    > Future<<return Type>> future = executorService.sumit(<Callable>);
+       >    > 
+       >    > // 永远使用 Try-Catch 处理 Future
+       >    > try{
+       >    >     <return Type> result = future.get();
+       >    > }
+       >    > catch 
+       >    >     (InterruptedException | ExecutionException ignored)
+       >    > {}
+       >    > 
+       >    > // 关闭 executorService
+       >    > executorService.shutdown();
        >    > ```
        >    >
        >    > 
        >
-       > 2. **Executors** 提供四种工厂方法
+       > 2. **Executors** 提供四种工厂方法新建
        >
        >    > 1. **CachedThreadPool**
        >    >
@@ -412,7 +427,35 @@
        >    >
        >    >    > 1. `只有核心线程`
 
-9. ****
+9. **Dead Lock ( 死锁 )**
+
+   + **发生的条件**
+
+     > 以下四种情况`都满足时`, 死锁发生, 打破其中一种情况, 死锁解除
+     >
+     > > 1. **Mutual exclusion (互斥)**
+     > >
+     > >    > `资源被占用时`, 其他线程**不能使用**该资源
+     > >
+     > > 2. **Hold and Wait**
+     > >
+     > >    > 线程`请求使用` 其他资源时, `保持自身`已占有的资源
+     > >
+     > > 3. **No Preemption( 非抢占式 )**
+     > >
+     > >    > 资源**只能**由线程 `主动释放, 不允许抢占资源`
+     > >
+     > > 4. **Circuular Wait( 循环等待 )**
+     > >
+     > >    > A 占有 B, B 占有 C, C 占有 A
+
+   + **解决方法**
+
+     > 1. `重新排序`获得锁的顺序
+     >
+     >    > A --> 锁 A, B --> 锁 B, 
+
+   
 
 ### 1.7 集合
 
