@@ -261,7 +261,7 @@
      > 1. **CRUD**
      >
      >    > ```java
-     >    > synchronized (Object monitor){<synchronized block}
+     >    > synchronized (Object monitor){<synchronized block>}
      >    > ```
      >    >
      >    > 
@@ -329,7 +329,7 @@
    + **读写锁**
 
      > 1. 实现的 `读写线程分开`
-     > 2. 多个线程可以 `同时获得读锁`, 反过来不成立
+     > 2. 多个线程`可以同时获得读锁`, 但`不能同时获得写锁`
      > 3. **读写锁** `同一时间只有一个`可以被获得
 
    + **可重入锁**
@@ -359,8 +359,60 @@
      + **ExecutorService**
 
        <img src="Java.assets/Screenshot%20from%202021-04-06%2000-54-24.png" alt="Screenshot from 2021-04-06 00-54-24" style="zoom:150%;" />
+       
+     + **ExecutorService Implementation**
+
+       <img src="Java.assets/Untitled%20Diagram-1617696238897.png" alt="Untitled Diagram" style="zoom:150%;" />
 
    + **综述**
+
+     > 1. **ExecutorService** 底层使用 `Thread Pool` , 简化了多线程操作
+
+   + **ThreadPoolExecutor**
+
+     > 1. **CRUD**
+     >
+     > 2. **工作流程**
+     >
+     >    > 1. 如果 `线程数 < corePoolSize`, `创建新的线程` 处理任务
+     >    > 2. 否则将任务放入 `workQueue` 中等待处理
+     >    > 3. 如果 `workQueue` 已满, 且 `maximumPoolSize > corePoolSize`, 则创建 `非核心线程` 处理任务
+     >    > 4. 如果 `总线程数量 > maxmunPoolSize`, 则使用 **RejectedExecutionHandler**处理任务
+     >    > 5. 当 `线程空闲时间 > keepAliveTime` , 则将 `非核心线程` 关闭
+
+   + **Executors**
+
+     + **综述**
+
+       > 1. **CRUD**
+       >
+       >    > ```java
+       >    > 
+       >    > ```
+       >    >
+       >    > 
+       >
+       > 2. **Executors** 提供四种工厂方法
+       >
+       >    > 1. **CachedThreadPool**
+       >    >
+       >    >    > 1. 全部线程为 `非核心线程`, 数量无限
+       >    >    > 2. 适合 `数量多, 时间短` 的任务
+       >    >
+       >    > 2. **ScheduledThreadPool**
+       >    >
+       >    >    > 1. 有 **核心线程** , 非核心线程 `无限多`
+       >    >
+       >    > 3. **SingleThreadPool**
+       >    >
+       >    >    > 1. `只有一条线程`
+       >    >    > 2. 适合`顺序`执行任务
+       >    >
+       >    > 4. **FixedThreadPool**
+       >    >
+       >    >    > 1. `只有核心线程`
+
+9. ****
 
 ### 1.7 集合
 
@@ -439,27 +491,27 @@
        > 1. 底层数据结构是`数组`, 线程安全
 
 + **Set**
-  
+
   0. **Set 综述**
-  
+
      > 1. 无法保存 `重复的元素`
        > 2. 不支持`任意访问`
 
     1. **HashSet**
 
        + **综述**
-  
+
        > 1. 底层数据结构是 `数组+链表 = 哈希表`
-         > 2. 线程不安全
+       > 2. 线程不安全
        > 3. 元素 `无序存储`
-         > 4. 存储过程
-       >    1. 计算存储对象的 `HashCode(int 型)`
-         >    2. 检查 `HashCode`的位置是否有`已储存的对象` , 没有则将新对象存储在 `HashCode` 的位置
-         >    3. 如果存在已储存的对象, 则调用 `equals()` 方法比较内容, 不相等则在 `HashCode` 的位置 `追加储存(解决地址冲突)`
-         >    4. 如果两个对象的`内容也相等`, 则放弃存储
-  
+       > 4. 存储过程
+       >    > 1. 计算存储对象的 `HashCode(int 型)`
+       >    > 2. 检查 `HashCode`的位置是否有`已储存的对象` , 没有则将新对象存储在 `HashCode` 的位置
+       >    > 3. 如果存在已储存的对象, 则调用 `equals()` 方法比较内容, 不相等则在 `HashCode` 的位置 `追加储存(解决地址冲突)`
+       >    > 4. 如果两个对象的`内容也相等`, 则放弃存储
+
        + **LinkedHashSet**
-  
+
          > 1. 使用 `链表` 维护元素的`插入次序`
          >
        > 2. 元素可以 `"有序"存储`
@@ -467,17 +519,17 @@
        >    > 1. `迭代顺序`与`插入顺序`一致
          >
          > 3. 线程不安全
-  
+
     2. **TreeSet**
-  
+
        + **综述**
-  
+
        > 1. 底层数据结构是 `红黑树`
          > 2. 元素 `"有序"` 存储
        >    1. 根据元素本身的 `compareTo(实现 Comparable 接口)` 方法 `有序存储`
          >    2. 或者自己实现 `compare(实现 Comparator 接口)` 方法 `有序存储`
        >    3. 上述两者均存在时 , 优先使用 `compare` 方法.
-  
+
 + **Map**
 
   + **Map的综述**
