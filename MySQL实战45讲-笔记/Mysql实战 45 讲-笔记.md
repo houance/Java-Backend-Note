@@ -2,6 +2,10 @@
 
 [toc]
 
+## 0. MySQL 语句
+
+
+
 ## 1. MySQL 基本架构
 
 ![Screenshot from 2021-02-24 23-20-36](Mysql%E5%AE%9E%E6%88%98%2045%20%E8%AE%B2-%E7%AC%94%E8%AE%B0.assets/Screenshot%20from%202021-02-24%2023-20-36.png)

@@ -63,6 +63,8 @@
   > 1. `垃圾空间` 是指没有任何`栈内存指向`的`堆内存空间`
   > 2. `垃圾空间` 会被 `GC(Garbage Collector)` 定期回收
 
+---
+
 ### 1.4 对象向上和向下转型
 
 + **向上转型**
@@ -109,6 +111,8 @@
     > Fruit fruit = new Apple();// 向上转型
     > Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
     > ```
+
+---
 
 ### 1.5 泛型( Generics )
 
@@ -172,6 +176,8 @@
     >     (<Class><? extends Number> a, 
     >      <Class><? extends Number> b)
     > ```
+
+---
 
 ### 1.6 线程
 
@@ -511,6 +517,8 @@
       >
       >    > 1. 只能存放一个元素
 
+---
+
 ### 1.7 集合
 
 + **Collection**
@@ -669,6 +677,8 @@
   + **TreeMap**
   
   + 
+
+---
 
 ### 1.8 JVM ( Java Virtual Machine )
 
