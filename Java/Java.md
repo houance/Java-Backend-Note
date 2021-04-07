@@ -453,9 +453,63 @@
 
      > 1. `重新排序`获得锁的顺序
      >
-     >    > A --> 锁 A, B --> 锁 B, 
+     >    > 1. 排序前
+     >    >
+     >    >    <img src="Java.assets/Untitled%20Diagram%20(4)-1617759143464.png" alt="Untitled Diagram (4)" style="zoom:150%;" />
+     >    >
+     >    > 2. 排序后
+     >    >
+     >    >    <img src="Java.assets/Untitled%20Diagram%20(3).png" alt="Untitled Diagram (3)" style="zoom:150%;" />
+     >
+     > 2. **Timeout Backoff**
+     >
+     >    > 1. 线程 A `持有锁 A`, 尝试获得锁 B
+     >    > 2. 如果线程 A 被阻塞, 则等待一段时间
+     >    > 3. 如果超时, 则`线程 A 放弃锁 A`, 等待一段时间, 重试尝试获取锁 A,B
+     >
+     > 3. **检测死锁**
+     >
+     >    > 1. 根据线程和锁的关系 `构建图`
+     >    > 2. 检测 `图是否有环`
 
-   
+10. **阻塞队列( BlockingQueue )**
+
+    + **结构**
+
+      <img src="Java.assets/Screenshot%20from%202021-04-07%2010-14-15.png" alt="Screenshot from 2021-04-07 10-14-15" style="zoom:150%;" />
+
+    + **综述**
+
+      > 1. 以下情况的访问会被阻塞
+      >
+      >    > 1. `队列满了`的时候进行`入队列操作` 
+      >    > 2. `队列空了`的时候进行`出队列操作`
+
+    + **实现**
+
+      > 1. **ArrayBlockingQueue**
+      >
+      >    > 1. 有界
+      >
+      > 2. **DelayQueue**
+      >
+      >    > 1. 有界
+      >    > 2. 需要为队列中的元素指定`过期时间`
+      >    > 3. 队列中的元素`根据过期时间排序`
+      >
+      > 3. **LinkedBlockingQueue**
+      >
+      >    > 1. 内部使用`链表实现`
+      >    > 2. 不指定大小则为`无界`
+      >
+      > 4. **PriorityBlockingQueue**
+      >
+      >    > 1. 无界
+      >    > 2. 根据元素`优先级排序`
+      >
+      > 5. **SynchronousQueue**
+      >
+      >    > 1. 只能存放一个元素
 
 ### 1.7 集合
 
