@@ -2,6 +2,145 @@
 
 [toc]
 
+## 基本语法
+
+### SELECT/UPDATE/DELETE/INSERT INTO
+
++ **示例**
+
+  + SELECT
+
+    ```mysql
+    # 选取指定列
+    SELECT column1, column2, ...
+    FROM table_name;
+    
+    # 选取全部列
+    SELECT * FROM table_name;
+    
+    # 对指定列的全部值 进行去重
+    SELECT DISTINCT column1, column2, ...
+    FROM table_name;
+    ```
+
+    
+
+  + UPDATE
+
+    ```mysql
+    # 如果没有 WHERE 语句, 会对表中 全部列 进行数据更新
+    UPDATE table_name
+    SET column1 = value1, column2 = value2, ...
+    WHERE condition;
+    ```
+
+    
+
+  + DELETE
+
+    ```mysql
+    # 如果没有 WHERE 语句, 会删除 整个表
+    DELETE FROM table_name WHERE condition;
+    ```
+
+    
+
+  + INSERT INTO
+
+    ```mysql
+    # 对 部分列 添加行, 剩下的列自动设置为 默认值
+    INSERT INTO table_name (column1, column2, column3, ...)
+    VALUES (value1, value2, value3, ...);
+    
+    # 对 全部列 添加行
+    INSERT INTO table_name
+    VALUES (value1, value2, value3, ...);
+    ```
+
+    
+
+### WHERE
+
++ **综述**
+
+  > 1. 用于从 **结果集** 中筛选 `符合条件` 的数据
+  > 2. 可以使用 `AND, OR, NOT` 关键字 **连接** 多个条件 
+
++ **示例**
+
+  ```mysql
+  # AND, OR 用于连接多个条件
+  SELECT column1, column2, ...
+  FROM table_name
+  WHERE condition1 AND / OR condition2 AND / OR condition3 ...;
+  
+  # NOT 用于展示 不符合条件 的数据
+  SELECT column1, column2, ...
+  FROM table_name
+  WHERE NOT condition;
+  ```
+
+### ORDER BY
+
++ **综述**
+
+  > 1. 对 **结果集** 排序, 默认是 `升序`
+
++ **示例**
+
+  ```mysql
+  SELECT column1, column2, ...
+  FROM table_name
+  ORDER BY column1, column2, ... ASC|DESC;
+  ```
+
+### LIMIT
+
++ **综述**
+
+  > 1. 用于从 **结果集** 中返回指定数量的结果
+  > 2. 可以提高性能
+
++ **示例**
+
+  ```mysql
+  SELECT column_name(s)
+  FROM table_name
+  WHERE condition
+  LIMIT number;
+  ```
+
+  
+
+### LIKE
+
+
+
+## 常用技巧
+
++ **去重**
+
+  ```mysql
+  SELECT DISTINCT 需要去重的字段名 ......;
+  
+  GROUP BY 需要去重的字段名 ......;
+  ```
+
++ **子查询**
+
+  ```mysql
+  # 用于 在另一个查询语句 的结果里面查询
+  WHERE 字段名 NOT IN/IN (SELECT ......);
+  ```
+
++ **判断字段值是否为 NULL**
+
+  ```mysql
+  WHERE 字段名 IS NULL/NOT NULL;
+  ```
+
+  
+
 ## 分组( GROUP BY )
 
 + **综述**
@@ -12,15 +151,17 @@
   >
   >    > 1. 此时会对该 **字段列** 的所有值 `进行排序`
   >    > 2. 然后把该字段列 `具有相同值` 的**多条记录合并为一组记录**
+  >    > 3. 对于 **被组合** 的行, 此时如果调用 `SELECT` , 只会显示每个字段的`第一个值`
   >
-  >    ![Untitled Diagram (3)](MySQL.assets/Untitled%20Diagram%20(3).png)
+  >    ![Untitled Diagram](MySQL.assets/Untitled%20Diagram-1620709978133.png)
   >
   > 3. 对 **多个字段** 进行分组
   >
   >    > 1. 此时会对 **多个字段列** 的所有值 `进行排序`
   >    > 2. 只有 **多个字段值** `完全相同的` 的记录才会被 `归为一组`
+  >    > 3. 对于 **被组合** 的行, 此时如果调用 `SELECT` , 只会显示每个字段的`第一个值`
   >
-  >    ![Untitled Diagram (4)](MySQL.assets/Untitled%20Diagram%20(4).png)
+  >    ![Untitled Diagram (1)](MySQL.assets/Untitled%20Diagram%20(1)-1620709987142.png)
 
 + **语法**
 
