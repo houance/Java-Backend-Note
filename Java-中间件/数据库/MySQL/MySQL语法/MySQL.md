@@ -80,6 +80,19 @@
   WHERE NOT condition;
   ```
 
+#### LIKE
+
++ **综述**
++ 
+
+
+
+
+
+
+
+
+
 ### ORDER BY
 
 + **综述**
@@ -109,12 +122,6 @@
   WHERE condition
   LIMIT number;
   ```
-
-  
-
-### LIKE
-
-
 
 ## 常用技巧
 
