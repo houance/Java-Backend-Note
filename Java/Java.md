@@ -521,79 +521,79 @@
 
 ### 1.7 集合
 
-+ **Collection**
+#### **Collection**
 
-  + **Collection 综述**
++ **综述**
 
-    > 1. 全部`单值`存储容器都要 `实现的接口`
-    >
-    > 2. Colection 的 `CRUD` 示例 
-    >
-    >    > ```java
-    >    > <List/Set><String> list/set = New <Collection 实现类><>();
-    >    > 
-    >    > list.add("a");//增
-    >    > 
-    >    > list.remove(0);//删
-    >    > 
-    >    > list.set(0,"A");//改
-    >    > 
-    >    > list.get(0);//查
-    >    > 
-    >    > Collections.sort(list);//排序, 字符串根据 ASCII
-    >    > Collections.max(list);// 找到最大值
-    >    > Collections.min(list);// 找到最小值
-    >    > 
-    >    > //for-each遍历, 遍历中无法删除元素
-    >    > for (String s: list/set){
-    >    > System.out.println(s);
-    >    > }
-    >    > 
-    >    > //迭代器遍历, 遍历中可以删除元素
-    >    > Iterator<String> iterator = list/set.iteator();
-    >    > while (iterator.hasNext()){
-    >    >  iterator.next();
-    >    >  iterator.remove(); //使用迭代器删除元素
-    >    > }
-    >    > 
-    >    > //输出全部值
-    >    > System.out.println(list/set);
-    >    > ```
-    > 3. 单线程 `迭代` 的过程使用 `<Collection 实现类>.remove()` 会出现并发更新异常. 需要使用 `Iterator.remove()` 
+  > 1. 全部`单值`存储容器都要 `实现的接口`
+  >
+  > 2. Colection 的 `CRUD` 示例 
+  >
+  >    > ```java
+  >    > <List/Set><String> list/set = New <Collection 实现类><>();
+  >    > 
+  >    > list.add("a");//增
+  >    > 
+  >    > list.remove(0);//删
+  >    > 
+  >    > list.set(0,"A");//改
+  >    > 
+  >    > list.get(0);//查
+  >    > 
+  >    > Collections.sort(list);//排序, 字符串根据 ASCII
+  >    > Collections.max(list);// 找到最大值
+  >    > Collections.min(list);// 找到最小值
+  >    > 
+  >    > //for-each遍历, 遍历中无法删除元素
+  >    > for (String s: list/set){
+  >    > System.out.println(s);
+  >    > }
+  >    > 
+  >    > //迭代器遍历, 遍历中可以删除元素
+  >    > Iterator<String> iterator = list/set.iteator();
+  >    > while (iterator.hasNext()){
+  >    >  iterator.next();
+  >    >  iterator.remove(); //使用迭代器删除元素
+  >    > }
+  >    > 
+  >    > //输出全部值
+  >    > System.out.println(list/set);
+  >    > ```
+  > 3. 单线程 `迭代` 的过程使用 `<Collection 实现类>.remove()` 会出现并发更新异常. 需要使用 `Iterator.remove()` 
 
-  + **List**
+  ##### List
 
-    0. **综述**
+  0. **综述**
 
-       > 1. 元素`有序存储`
-       >
-       >    > 1. 元素`存储顺序`和 `插入顺序` 一致
-       >
-       > 2. 支持 `任意访问`
-       >
-       > 3. 存储的元素 `可以重复`
-       >
-       
-    1. **LinkedList**
-    
-       + **综述**
-    
-       > 1. 底层数据结构是`链表`, 线程不安全
-         > 2. 没有 `动态扩容`
-
-    2. **ArrayList**
-
-       + **综述**
-    
-       > 1. 底层数据结构是`数组` , 线程不安全
-         > 2. 默认构造`空数组`, 使用的时候开辟大小为 `10` 的空间
-       > 3. 空间不足的时候, 扩容 `现有空间 / 2`的大小, 然后进行数据搬移.
-    
-  3. **Vector**
+     > 1. 元素`有序存储`
+     >
+     >    > 1. 元素`存储顺序`和 `插入顺序` 一致
+     >
+     > 2. 支持 `任意访问`
+     >
+     > 3. 存储的元素 `可以重复`
+     >
      
-       + **综述**
-       
-       > 1. 底层数据结构是`数组`, 线程安全
+  1. **LinkedList**
+
+     + **综述**
+
+     > 1. 底层数据结构是`链表`, 线程不安全
+       > 2. 没有 `动态扩容`
+
+  2. **ArrayList**
+
+     + **综述**
+
+     > 1. 底层数据结构是`数组` , 线程不安全
+       > 2. 默认构造`空数组`, 使用的时候开辟大小为 `10` 的空间
+     > 3. 空间不足的时候, 扩容 `现有空间 / 2`的大小, 然后进行数据搬移.
+
+3. **Vector**
+   
+     + **综述**
+     
+     > 1. 底层数据结构是`数组`, 线程安全
 
 + **Set**
 
