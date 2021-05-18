@@ -1,7 +1,5 @@
 # Mysql实战 45 讲-笔记
 
-[toc]
-
 ## MySQL 语句
 
 
@@ -75,7 +73,26 @@
 
 ### 行格式
 
+##### 综述
+
+> 1. 目前分为 **Compact, Redundant, Dynamic, Compressed**
+> 2. 常用的就是 `Compact` 格式
+
+##### Compact 格式详解
+
++ **结构**
+
+  ![Screenshot from 2021-05-17 09-45-30](Mysql%E5%AE%9E%E6%88%98%2045%20%E8%AE%B2-%E7%AC%94%E8%AE%B0.assets/Screenshot%20from%202021-05-17%2009-45-30-1621232981224.png)
+
++ **变长字段长度列表**
+
+  > 1. 储存
+
+
+
 #### 行溢出数据
+
+## MySQL 的索引
 
 ## MySQL 日志系统
 
@@ -196,7 +213,5 @@
 + **解决幻读**
 
   > 
-
-## MySQL 的索引
 
 ## MySQL 的
