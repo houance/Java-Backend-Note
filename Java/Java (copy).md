@@ -846,6 +846,25 @@
 
   ![45205ec2](Java%20(copy).assets/45205ec2.png)
 
++ **主要步骤**
+
+  > 1. 计算 **Key** 的 `hashCode` 
+  >
+  > 2. **高位运算 + 异或运算**, 得到新的 `hashCode`
+  >
+  > 3. 最后进行 `取模运算`, 得到最终的地址
+  >
+  >    > 1. 因为 **length** 总是 **2的n次方**, 所以对 **length-1** 的`按位与` 运算等价于 `取模运算`
+  >    >
+  >    >    ```java
+  >    >    // 当且仅当 b为2的n次方时成立
+  >    >    a % b == a & (b - 1);
+  >    >    ```
+  >    >
+  >    >    
+  >    >
+  >    > 2. 但是 `按位与` 运算比 `取模运算` 更快
+
 + **源码**
 
   ```java
@@ -866,4 +885,138 @@
 
 
 
+#### 插入
+
++ **示意图**
+
+  <img src="Java%20(copy).assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
+
++ **主要步骤**
+
+  > 1. 如果该位置 `没有元素` , 则直接插入
+  > 2. 如果有元素, 则逐个元素调用 `equals()` 方法
+  > 3. 返回 **true** 则 `直接覆盖` ; 返回 **false** 则在 `尾部插入`
+  > 4. 如果链表长度 大于**8**, 则 `树化为红黑树`, 然后插入
+  > 5. 如果插入后 **size > threshold** , 则扩容
+
++ **源码**
+
+  ```java
+  public V put(K key, V value) {
+      
+      // 对 key 的 hashCode() 做 hash
+      // 然后使用 putVal
+      return putVal(hash(key), key, value, false, true);
+  }
+  
+  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                 boolean evict) {
+      
+      Node<K,V>[] tab; Node<K,V> p; int n, i;
+      
+      // 1.lazy-Load, 即 真正放入元素时 才初始化 hashMap
+      if ((tab = table) == null || (n = tab.length) == 0)
+          n = (tab = resize()).length;
+      
+      // 2.计算地址, 如果该位置为空
+      //   即没有相同的 Key, 则直接插入
+      if ((p = tab[i = (n - 1) & hash]) == null)
+          tab[i] = newNode(hash, key, value, null);
+      
+      else {
+          Node<K,V> e; K k;
+          
+          // 3.如果存在相同的 Key 和 Value ,则直接覆盖
+          if (p.hash == hash &&
+              ((k = p.key) == key || (key != null && key.equals(k))))
+              e = p;
+          
+          // 4. 否则判断是否为 红黑树
+          // 	  是则插入到树中
+          else if (p instanceof TreeNode)
+              e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+          
+          else {
+              
+              // 5. 否则遍历链表, 查看是否存在相同的 Value
+              for (int binCount = 0; ; ++binCount) {
+                  if ((e = p.next) == null) {
+                      p.next = newNode(hash, key, value, null);
+                      
+                      // 链表长度大于8, 转换为红黑树
+                      if (binCount >= TREEIFY_THRESHOLD - 1)
+                          treeifyBin(tab, hash);
+                      break;
+                  }
+                  
+                  // 存在相同的 Key 和 Value
+                  // 则直接覆盖
+                  if (e.hash == hash &&
+                      ((k = e.key) == key || 
+                       (key != null && key.equals(k))))
+                      break;
+                  
+                  // 不存在则在尾部插入
+                  p = e;
+              }
+          }
+          if (e != null) { // existing mapping for key
+              V oldValue = e.value;
+              if (!onlyIfAbsent || oldValue == null)
+                  e.value = value;
+              afterNodeAccess(e);
+              return oldValue;
+          }
+      }
+      ++modCount;
+      
+      // 超过最大容量 就扩容
+      if (++size > threshold)
+          resize();
+      afterNodeInsertion(evict);
+      return null;
+  }
+  
+  ```
+
+  
+
+
+
 #### 扩容
+
++ **示意图( JDK1.7 )**
+
+  ![b2330062](Java%20(copy).assets/b2330062.png)
+
+  > 1. 链表在扩容之后发生 `倒置` , 因为 **Java7** 采用的是 `头插法`, **Java8** 不会
+  > 2. 每一个元素都要进行 `重新哈希` , 比较耗时. **Java8** 采用比较巧妙的方法解决此问题
+
++ **不需要重新哈希的方法**
+
+  <img src="Java%20(copy).assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
+
+  > 1. **length** 总是 2的n次方, 即当发生扩容时, length 只会增加一位 1
+  >
+  >    ```java
+  >    1111(16) --> 0001 1111(32)
+  >    ```
+  >
+  > 2. 那么, 只需要根据元素 **原来的哈希值** 在 **length** 新增加的那一位 `是否为 1`, 即可判断该元素 `是否需要移动位置( 1则需要移动, 0 则不需要)`
+  >
+  > 3. 如果需要移动, 那么
+  >
+  >    ```java
+  >    // 因为 newIndex = hash & (length - 1)
+  >    // hash 是不会变的, 
+  >    // 那么 newIndex 只跟 length - 1有关
+  >    newIndex = oldIndex + oldCap;
+  >    ```
+  >
+  >    
+
+  
+
++ **线程安全问题**
+
+  
