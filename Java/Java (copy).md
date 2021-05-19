@@ -762,41 +762,108 @@
 
 ### HashMap 设计与实现
 
-+ **前情提要**
+#### 前情提要
 
-  > 1. **equals 方法**
-  >
-  >    > 1. 没有覆写, 则比较两个对象的 `地址` 是否相等
-  >    >
-  >    > 2. 覆写后, 用于比较两个对象的 `值` 是否相等
-  >    >
-  >    >    ```java
-  >    >    int a=1;
-  >    >    int b=1;
-  >    >    
-  >    >    // 没有覆写
-  >    >    a.equals(b); // 结果为 false
-  >    >    
-  >    >    // 覆写为比较两个对象的 值
-  >    >    a.equals(b); // 结果为 true
-  >    >    ```
-  >    >
-  >    >    
-  >
-  > 2. **hashCode 方法**
-  >
-  >    > 1. 输入对象的 **地址**, 输出 `一个整数`
-  >    >
-  >    >    > 1. 一般的来说, 就是把 **任意长度的输入, 变换为固定长度的输出**
-  >    >
-  >    > 2. 不同的输入可能会 `导致相同的输出`
-  >
-  > 3. 两者在 **HashMap** 中的约束
-  >
-  >    > 1. **equals()** 相等, 则 **hashCode()** 也要相等
-  >    >
-  >    > 2. 重写 **hashCode()** , 也要重写 **equals()**
-  >    >
-  >    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
+> 1. **equals 方法**
+>
+>    > 1. 没有覆写, 则比较两个对象的 `地址` 是否相等
+>    >
+>    > 2. 覆写后, 用于比较两个对象的 `值` 是否相等
+>    >
+>    >    ```java
+>    >    int a=1;
+>    >    int b=1;
+>    >    
+>    >    // 没有覆写
+>    >    a.equals(b); // 结果为 false
+>    >    
+>    >    // 覆写为比较两个对象的 值
+>    >    a.equals(b); // 结果为 true
+>    >    ```
+>    >
+>    >    
+>
+> 2. **hashCode 方法**
+>
+>    > 1. 输入对象的 **地址**, 输出 `一个整数`
+>    >
+>    >    > 1. 一般的来说, 就是把 **任意长度的输入, 变换为固定长度的输出**
+>    >
+>    > 2. 不同的输入可能会 `导致相同的输出`
+>
+> 3. 两者在 **HashMap** 中的约束
+>
+>    > 1. **equals()** 相等, 则 **hashCode()** 也要相等
+>    >
+>    > 2. 重写 **hashCode()** , 也要重写 **equals()**
+>    >
+>    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
 
-+ 
+#### 阈值( threshold )和负载因子( loadFactor )
+
++ **源码**
+
+  ```java
+  // HashMap 中 初始化操作的字段
+  int threshold;
+  final float loadFactor;
+  int modCount;
+  int size;
+  ```
+
+  
+
++ **讲解**
+
+  > 1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括`拉链存储`的键值对 )
+  >
+  >    ```java
+  >    threshold = length * loadFactor;
+  >    ```
+  >
+  > 2. **loadFactor** 是对空间和时间的一个取舍
+  >
+  >    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
+  >    > 2. **loadFactor** 越大, 则与上述相反
+  >
+  > 3. **length** 是 hashMap 实际长度( 不包括`拉链存储` 的键值对 )
+  >
+  >    > 1. **length** 初始化为 16
+  >    >
+  >    > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
+  >    >
+  >    >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
+  >    >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
+  >    >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
+  >
+  > 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
+  >
+  > 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对
+
+#### 寻址
+
++ **示意图**
+
+  ![45205ec2](Java%20(copy).assets/45205ec2.png)
+
++ **源码**
+
+  ```java
+  static final int hash(Object key) {
+      int h;
+      
+      // 计算一次 hashCode, 然后右移16位( 取高位数值 )
+      // 将原来的 hashCode 与右移的 hashCode 做 异或运算
+      // 得到最终的 hashCode
+      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+  }
+  
+  // 取模运算, 根据 hashCode 得到实际在 hashMap 中的位置
+  static int indexFor(int h, int length) {
+       return h & (length-1); 
+  }
+  ```
+
+
+
+#### 扩容
