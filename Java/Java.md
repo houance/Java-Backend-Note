@@ -742,6 +742,8 @@
 
 > 1. **HashTable** 早期使用, 目前多用 **HashMap**
 >
+>    > HashTable 是线程安全的, 实现方法是把 `put, get ,size` 等方法加锁
+>
 > 2. **HashMap**
 >
 >    > 1. 支持 `null 键值`
@@ -821,7 +823,7 @@
   >    threshold = length * loadFactor;
   >    ```
   >
-  > 2. **loadFactor** 是对空间和时间的一个取舍
+  > 2. **loadFactor** 是对`空间和时间`的一个取舍
   >
   >    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
   >    > 2. **loadFactor** 越大, 则与上述相反
@@ -844,7 +846,7 @@
 
 + **示意图**
 
-  ![45205ec2](Java%20(copy).assets/45205ec2.png)
+  ![45205ec2](Java.assets/45205ec2.png)
 
 + **主要步骤**
 
@@ -889,7 +891,7 @@
 
 + **示意图**
 
-  <img src="Java%20(copy).assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
+  <img src="Java.assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
 
 + **主要步骤**
 
@@ -987,14 +989,14 @@
 
 + **示意图( JDK1.7 )**
 
-  ![b2330062](Java%20(copy).assets/b2330062.png)
+  ![b2330062](Java.assets/b2330062.png)
 
   > 1. 链表在扩容之后发生 `倒置` , 因为 **Java7** 采用的是 `头插法`, **Java8** 不会
   > 2. 每一个元素都要进行 `重新哈希` , 比较耗时. **Java8** 采用比较巧妙的方法解决此问题
 
 + **不需要重新哈希的方法**
 
-  <img src="Java%20(copy).assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
+  <img src="Java.assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
 
   > 1. **length** 总是 2的n次方, 即当发生扩容时, length 只会增加一位 1
   >
@@ -1017,6 +1019,111 @@
 
   
 
-+ **线程安全问题**
+#### 线程安全问题
+
+##### **JDK 1.7**
+
++ **源码**
+
+  ```java
+  void transfer(Entry[] newTable, boolean rehash){
+      int newCapacity = newTable.length;
+      for (Entry<K, V> e : table){
+          while(e != null){
+              
+              // 储存当前结点的下一个结点
+              // 因为之后会 断开 当前结点的 指向
+              Entry<K, V> next = e.next;
+              
+              if(rehash){
+                  e.hash = null == e.key ? 0 : hash(e.key);
+              }
+              
+              // 计算新的储存位置
+              int i = indexFor(e.hash, newCapacity);
+              
+              // 若该位置为空, 则当前元素指向 null : null 结点
+              // 否则指向该位置存储的元素
+              // 相当于插入已有结点的前面, 即"头插法"
+              e.next = newTable[i];
+              newTable[i] = e;
+              
+              // 注意!!!
+              // 链表中的整个结点是不可能被覆盖的, 只能覆盖结点的值
+              // 当没有任何引用指向结点, 和结点不指向任何结点时
+              // 该结点会被垃圾回收, 称为 "删除结点"
+              
+              // 相当于普通循环中的 i++
+              e = next;
+          }
+      }
+  }
+  ```
 
   
+
++ **死循环**
+
+  > 1. 此时 **线程 A** 和 **线程 B** `同时触发`扩容机制
+  >
+  >    <img src="Java.assets/1553942282.jpeg" alt="1553942282" style="zoom:150%;" />
+  >
+  > 2. **线程 A** 将 **3** 解除指向, 此时操作系统 `进行了时间片轮询`
+  >
+  >    <img src="Java.assets/1553943048.jpeg" alt="1553943048" style="zoom:150%;" />
+  >
+  > 3. **线程 B** 完成了整个扩容, 此时操作系统 `进行了时间片轮询`. 
+  >
+  >    注意, 对于 **线程 A** 来说, `e = 3,  e.next = null, next = 7 , next.next = 3`
+  >
+  >    ![3](Java.assets/3.png)
+  >
+  > 4. **线程 A** 继续进行扩容, 将 **3** 又插入了链表的头部.
+  >
+  >    ![4](Java.assets/4.png)
+  >
+  > 5. 进入下一轮循环, 更新 `e = 7, next = 3` , 又将 **7** 插入链表头部
+  >
+  >    ![5 (1)](Java.assets/5%20(1).png)
+  >
+  > 6. 进入下一轮循环, 更新 `e = 3, next = null`, 又将 **3** 插入链表头部, 形成的 **3** 和 **7** 互指的场面, 即链表有环.
+  >
+  >    ![6 (1)](Java.assets/6%20(1).png)
+  >
+  > 7. 下一次进行查询时, 将会出现 `死循环`
+
+##### JDK 1.8
+
++ **源码**
+
+  ```java
+  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                 boolean evict) {
+      
+  	//......
+      
+      // 计算地址, 如果该位置为空
+      // 即没有相同的 Key, 则直接插入
+      if ((p = tab[i = (n - 1) & hash]) == null)
+          
+          // 如果该位置存在结点
+          // 会使原来的结点即不指向任何结点, 也没有结点指向它
+          // 即该节点被删除了
+          tab[i] = newNode(hash, key, value, null);
+      
+      //.....
+  }
+  
+  ```
+
+  
+
++ **数据丢失问题**
+
+  > 1. 当 **线程 A**  对 **位置 1 ( 原本没有数据 )** 进行数据插入时, 操作系统 `进行时间片轮询`
+  > 2. **线程 B** 对 **位置 1** 完成了数据插入, 操作系统 `进行时间片轮询`
+  > 3. 此时 **线程 A** 对 **位置 1** 完成数据插入, 覆盖了 **线程 2 的数据**
+
+
+
+## ConcurrentHashMap
