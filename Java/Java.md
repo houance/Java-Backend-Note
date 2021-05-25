@@ -644,6 +644,45 @@
 
 # 八股文
 
+## CAS, Synchronized 的区别
+
+### 前情提要
+
+> 1. **CAS** --> 乐观锁
+> 2. Synchronized --> 包含各种锁( 一般统称 **悲观锁** )
+
+### CAS 算法
+
+> 1. **CAS** 全称 **CompareAndSwap** 
+>
+> 2. 即先拿到当前值( 存在线程自己的内存空间中 )
+>
+> 3. 然后比较当前值和内存中实际的值 `是否一致`
+>
+> 4. 一致则进行 `SWAP` 操作, 否则 `线程自旋( 即线程重新尝试操作 )`
+>
+>    > 1. 因为 **CAS 操作**在硬件上是 `原子性` 的, 这样可以 `保证数据一致性`
+>    > 2. 显然, 只能同时对 **一个变量** 进行 `CAS` 操作, 即保证`一个变量的原子性`
+
+### Synchronized 操作
+
+> 1. 锁对象, 只有拿到锁的线程才可以执行 `Synchronized Block` 里面的代码
+>
+> 2. 可以保证 **一个 Block 的代码** 的原子性
+>
+> 3. **monitor 对象** 包含的信息 : 
+>
+>    > 1. 该对象现在的状态( 被线程持有 / 没有被持有 )
+>    > 2. 该对象被抢占的频繁程度( 一定程度上用来表示线程等待队列的长度 )
+
+### Java 中多线程的原生处理
+
+
+
+### CAS, Synchronized 的区别
+
+
+
 ## 强引用、软引用、弱引用、幻象引用
 
 ### 用处
@@ -801,7 +840,7 @@
 >    >
 >    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
 
-#### 阈值( threshold )和负载因子( loadFactor )
+#### 阈值( threshold )和负载因子( loadFactor ) 和 初始化
 
 + **源码**
 
@@ -840,7 +879,9 @@
   >
   > 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
   >
-  > 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对
+  > 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
+  >
+  > 6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
 
 #### 寻址
 
@@ -1046,11 +1087,11 @@
 >
 > 2. **根结点** 和 **叶子结点(nil)** 均为 `黑色结点`
 >
->    > 1. **nil** 的意思是指, 每个结点都有两个 `值为 null` 的空结点
+>    > 1. **nil** 的意思是指, 每个结点都有两个 `值为 null` 的空结点, 直到有`真正的结点`插入
 >    >
 >    >    <img src="Java.assets/Screenshot%20from%202021-05-23%2018-15-05.png" alt="Screenshot from 2021-05-23 18-15-05" style="zoom:50%;" />
 >
-> 3. `红色结点`的叶子结点一定是 `黑色结点`
+> 3. `红色结点`的叶子结点`一定是`黑色结点
 >
 > 4. 从**一个结点**出发, 到该结点的 `任何一个叶子结点`, 路径上包含的 `黑结点` 数量相同
 >
@@ -1065,9 +1106,10 @@
 >    >
 >    >    > 与二叉查找树一致
 >    >
->    > 2. **插入和删除**
+>    > 2. **插入**
 >    >
->    >    > 1. 因为插入的结点总是设为 `红色` , 故意破坏 **红黑树** 的约束, 通过 `旋转和变色` 来重新达到平衡
+>    >    > 1. 因为插入的结点总是设为 `红色` , 故意破坏 **红黑树** 的约束, 从而通过 `旋转和变色` 来重新达到平衡
+>    >    > 2. 插入包含 **寻找插入位置** 和 **自平衡过程**, 前者是查找操作, 后者最坏的情况是对 `整棵树` 进行 **自平衡** , 所以总的复杂度是 `O( log n)`
 
 ##### 旋转
 
@@ -1113,31 +1155,54 @@
 
 ##### 插入策略
 
-###### Z 关系
++ **Z 关系**
 
 <img src="Java.assets/Screenshot%20from%202021-05-23%2020-37-15.png" alt="Screenshot from 2021-05-23 20-37-15" style="zoom:50%;" />
 
 > 1. Z 是要插入的结点
 > 2. 插入的结点总是 `红色` 的
 
-###### Z 是根结点
++ **Z 是根结点**
 
 > 1. 将 Z 涂成 `黑色`
 >
 >    ![Untitled Diagram (5)](Java.assets/Untitled%20Diagram%20(5).png)
 
-###### Z 的 uncle 是红色结点
++ **Z 的 uncle 是红色结点**
 
 > 1. 将 Z 的 **Uncle 和 Parent** 涂成`黑色`, 而 **Grandparent** 涂成`红色`
 >
 >    ![Untitled Diagram (4)](Java.assets/Untitled%20Diagram%20(4).png)
 
-###### Z 的 uncle 是黑色( 三角关系 )
 
-> 1. Z, Z.Parent, Z.Grandparent 呈三角关系
-> 2. 此时需要对
 
-###### Z 的 uncle 是黑色( 直线关系 )
++ **Z 的 uncle 是黑色并且呈现 三角关系**
+
+> 1. 其中 **Z, Z.Parent** 都是 `红色`
+>
+>    <img src="Java.assets/Screenshot%20from%202021-05-23%2020-49-54.png" alt="Screenshot from 2021-05-23 20-49-54" style="zoom:80%;" />
+>
+>    > 1. 即 **Z** 是 **Z.Parent** 的 `左/右` 结点, 而 **Z.Parent** 是 **Z.GrandParent** 的`右/左` 结点
+>
+> 2. 此时需要对 **Z.Parent** 进行与 `Z 的方向相反`的旋转
+>
+>    > 左图进行右旋, 右图进行左旋
+
+
+
++ **Z 的 uncle 是黑色并且呈现 直线关系**
+
+> 1. 其中 **Z, Z.Parent** 都是 `红色`
+>
+>    <img src="Java.assets/Screenshot%20from%202021-05-24%2021-03-32.png" alt="Screenshot from 2021-05-24 21-03-32" style="zoom:80%;" />
+>
+>    > 即 **Z** 是 **Z.Parent** 的 `左/右` 结点, 而 **Z.Parent** 是 **Z.GrandParent** 的`左/右` 结点
+>
+> 2. 此时需要对 **Z.GrandParent** 进行与 `Z 的方向相反`的旋转
+>
+>    > 左图进行 左旋, 右图进行 右旋
+>
+> 3. 并且需要对 **Z.GrandParent** 和 **Z.Parent** 进行涂色
 
 ##### 删除策略
 
@@ -1249,3 +1314,59 @@
 
 
 ## ConcurrentHashMap
+
+### JDK 7
+
+#### 结构图
+
+#### 综述
+
+#### 原理讲解
+
+### JDK 8
+
+#### 多线程扩容
+
++ **源码**
+
+  ```java
+  private final Node<K,V>[] initTable() {
+      Node<K,V>[] tab; int sc;
+      while ((tab = table) == null || tab.length == 0) {
+          if ((sc = sizeCtl) < 0)
+  			// 1. 保证只有一个线程正在进行初始化操作
+              //    没有抢到初始化的线程则直接进入等待
+              Thread.yield(); 
+          // 2. 第一个抢到初始化的线程利用 CAS 算法将 sizeCtl 置为 -1
+          //    使用 CAS 算法的原因是, 可能存在多个线程同时抢到初始化
+          else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
+              try {
+                  if ((tab = table) == null || tab.length == 0) {
+  					// 2. 得出数组的大小
+                      int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+                      @SuppressWarnings("unchecked")
+  					// 3. 这里才真正的初始化数组
+                      Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
+                      table = tab = nt;
+  					// 4. 计算数组中可用的大小：实际大小n*0.75（加载因子）
+                      sc = n - (n >>> 2);
+                  }
+              } finally {
+                  sizeCtl = sc;
+              }
+              break;
+          }
+      }
+      return tab;
+  }
+  ```
+
+  
+
++ **讲解**
+
+  > 1. 先判断有无线程`正在进行扩容`, 有的话当前线程**进入等待**
+  >
+  > 2. 没有的话利用 `CAS 算法` 将 **sizeCtl 置为 -1**
+  >
+  >    > 利用 **CAS 算法** 防止多个线程同时抢到 初始化
