@@ -156,48 +156,131 @@
 
 ---
 
-## 集合
+## 集合技巧
 
-### **Collection**
+### Lambda 技巧
 
 + **综述**
 
-  > 1. 全部`单值`存储容器都要 `实现的接口`
-  >
-  > 2. Colection 的 `CRUD` 示例 
-  >
-  >    > ```java
-  >    > <List/Set><String> list/set = New <Collection 实现类><>();
-  >    > 
-  >    > list.add("a");//增
-  >    > 
-  >    > list.remove(0);//删
-  >    > 
-  >    > list.set(0,"A");//改
-  >    > 
-  >    > list.get(0);//查
-  >    > 
-  >    > Collections.sort(list);//排序, 字符串根据 ASCII
-  >    > Collections.max(list);// 找到最大值
-  >    > Collections.min(list);// 找到最小值
-  >    > 
-  >    > //for-each遍历, 遍历中无法删除元素
-  >    > for (String s: list/set){
-  >    > System.out.println(s);
-  >    > }
-  >    > 
-  >    > //迭代器遍历, 遍历中可以删除元素
-  >    > Iterator<String> iterator = list/set.iteator();
-  >    > while (iterator.hasNext()){
-  >    >  iterator.next();
-  >    >  iterator.remove(); //使用迭代器删除元素
-  >    > }
-  >    > 
-  >    > //输出全部值
-  >    > System.out.println(list/set);
-  >    > ```
-  >    
-  > 3. 单线程 `迭代` 的过程使用 `<Collection 实现类>.remove()` 会出现并发更新异常. 需要使用 `Iterator.remove()` 
+  > 1. **lambda : 函数式编程**, 即把一个函数当成是参数传入
+  > 2. 因为 **lambda** 可以`自动推断参数的类型`, 所以写参数的时候可以`不用声明类型`
+  > 3. **例子** : (para1,para2) -> { 函数具体实现 }
+
++ **集合中的应用**
+
+  > 1. 使用 **lambda** 可以很方便的将一个类传入方法中, 省去了以前使用 `匿名内部类` 的形式
+  > 2. 这种方法仅当该类 `只有一个方法的时候` 可以使用
+
+
+
+#### forEach 遍历方法
+
++ **综述**
+
+  > 1. **forEach** 传入`一个参数(集合里面的值)`, **没有返回值**
+  > 2. 对于具体实现 `只有一个方法的情况`, 可以直接`传一个静态方法`
+  > 3. 在 **forEach** 形式的循环中 `无法更新` 集合的数据
+
++ **例子**
+
+  ```java
+  List<Integer> list = new ArrayList<>();
+  Set<Integer> set = new HashSet<>();
+  Map<Integer, Integer> map = new HashMap<>();
+  
+  // list 和 set 的例子
+  list/set.forEach(value->{
+      /* 
+      	Code Here
+      */
+  });
+  list/set.forEach(System.out::println);
+  
+  // map 的例子
+  map.forEach((key, value)->{
+      /* 
+      	Code Here
+      */
+  });
+  ```
+
+  
+
+#### List
+
++ **sort 排序方法重写**
+
+  ```java
+  List<Integer> list = new ArrayList<>();
+  /*
+  	list.add ...... 
+  */
+  
+  // sort 方法默认输入两个参数(集合里面相邻的两个值), 返回一个值
+  // 小于则返回 负数, 等于则返回 0, 大于则返回 正数
+  
+  // sort 默认的情况是升序排序
+  // 这里将 升序改为降序
+  // 只需要将 o1,o2 的参数比较的顺序序调转即可
+  
+  list.sort((o1, o2) -> return Integer.compare(o2, o1));
+  ```
+
+
+
+### 遍历中删除的技巧
+
+```java
+List<Integer> list = new ArrayList<>();
+/*
+	list.add ...... 
+*/
+Set<Integer> set = new HashSet<>();
+/* 
+	set.add ......
+*/
+Map<Integer, Integer> map = new HashMap<>();
+/* 
+	map.put ......
+*/
+
+// Map 生成 EntrySet, 即 一个 Set 存储的元素是 Entry
+// 然后再对这个 Set 生成一个 迭代器( Iterator )
+Iterator<Map.Entry<String, Integer>> iterator = maps.entrySet().iterator();
+
+// List 和 Set 就相对简单
+Iterator<Integer> iterator = list/set.iterator();
+
+while(iterator.hasNext()){
+    // 先取出 迭代器指向的元素
+    // 调用 next() 方法, 迭代器会取出当前元素, 然后自动指向下一个元素
+    Map.Entry<String, Integer> next = iterator.next();
+     
+    // 删除集合中的元素, 即删除上面取出的 next() 元素
+    // 调用 remove() 方法, 迭代器会在集合中删除 最近一次取出的元素
+    iterator.remove();
+    
+}
+```
+
+
+
+
+
+### Map
+
++ **Map 转 List / Set**
+
+  ```java
+  Map<String, Integer> maps = new HashMap<>();
+  
+  // Map 生成 entrySet, 即一个 Set 集合, 里面存放的元素是 Entry 类型
+  // 然后复制到 List 或者 Set 中
+  List/Set<Map.Entry<String, Integer>> entryArrayList = new ArrayList/HashSet<>(maps.entrySet());
+  
+  ```
+
+  
 
 ---
 
