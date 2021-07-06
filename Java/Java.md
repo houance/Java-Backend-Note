@@ -2,35 +2,137 @@
 
 
 
-## Hashtable、HashMap、TreeMap
+## 对象向上和向下转型
 
-### **综述**
+### 向上转型
 
-> 1. **HashTable** 早期使用, 目前多用 **HashMap**
->
->    > 1. HashTable 是线程安全的, 实现方法是把 `put, get ,size` 等方法加锁
->
-> 2. **HashMap**
->
->    > 1. 支持 `null 键值`
->    > 2. **无序存储**
->    > 3. **插入和访问** 的复杂度为 `常数`
->
-> 3. **TreeMap**
->
->    > 1. 不支持 `null 键值`
->    >
->    >    > 1. 因为需要实现 `Comparable 或 Comparator` 接口
->    >
->    > 2. **有序存储**, 但是是通过 `键的顺序` 排序的
->    >
->    > 3. **CURD** 的时间复杂度为 `log(n)`
->    >
->    >    > 1. 因为底层使用 `红黑树` 实现
+#### 例子
 
-### HashMap 设计与实现
+> ```java
+> // class Apple extend Fruit
+> Fruit fruit = new Apple();
+> ```
+>
+> 1. 此时 `fruit` 引用了 `Fruit` 的子类, 称为向上转型
+> 2. `fruit` 可以调用 `Apple 类` 中属于 `Fruit 类` 的属性和方法`( 如果方法被重写, 那么调用的是重写后的方法 )`.
+> 3. `fruit` 无法调用 `Apple 类` 中不属于 `Fruit 类` 的属性和方法
 
-#### 前情提要
+#### 应用
+
+> ```java
+> //class Apple extend Fruit
+> class Test{
+>  public void main(){
+>      run(new Fruit());
+>      run(new Apple());
+>  }
+> 
+>  private void run(Fruit fruit){
+>      fruit.anymethod();
+>  }
+> 
+> }
+> ```
+>
+> 1. 上述例子通过 `向上转型` , 省去了 `run` 方法的重载.
+
+
+
+### 向下转型
+
+#### 例子
+
+> ```java
+> // class Apple,Orange extend Fruit
+> Fruit fruit = new Apple(); //向上转型
+> Apple apple = (Apple) fruit; // (Apple) fruit 称为向下转型, 不会报错
+> 
+> Fruit fruit = new Apple();// 向上转型
+> Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
+> ```
+
+
+
+## 泛型( Generics )
+
+### 综述
+
+> 1. `泛型` 是指 类, 接口或者方法使用 `类型(Types)` 进行初始化, 通常用于编写 `集合/容器` 类.
+
+> 1. `Java` 着重于`类型安全(Type Safe)`, 大部分 `类型错误` 会在`编译期`被发现, 但是如果使用`强制类型转换`, 这种错误很难在编译期发现.  
+> 2. `Java 5` 之前, 一般使用 `Object` 实现 `泛型` 功能, 但是需要使用 `强制类型转换`, 带来很大的 `安全隐患`.
+> 3. `Java 5` 之后, 引入 `<>` 的方法, 在编译期就可以发现`类型错误`.
+
+
+
+### 例子
+
+> 1. **泛型类**
+>
+>    > ```java
+>    > public class Test<T> {
+>    >  private T val;
+>    > 
+>    >  public T getVal() {
+>    >      return val;
+>    >  }
+>    >  public T setVal(T val) {
+>    >      this.val = val;
+>    >  }
+>    > }
+>    > ```
+>    >
+>    > 
+>
+> 2. **泛型方法**
+>
+>    > ```java
+>    > // <Class> 是使用泛型的类(多是集合)
+>    > public <T> <Class><T> print(Test<T> a, Test<T> b){}
+>    > ```
+>    >
+>    > 
+
+
+
+### 通配符
+
+#### 综述
+
+> 1. 通常用于 `泛型方法` 中传入参数
+
+
+
+#### 用法
+
+> 1. 上界通配符
+>
+>    <img src="Java.assets/upper%20bound.png" alt="upper bound" style="zoom:150%;" />
+>
+> 2. 下界通配符
+>
+>    <img src="Java.assets/lower%20bound.png" alt="lower bound" style="zoom:150%;" />
+
+
+
+#### 例子
+
+> ```java
+> // <Class> 是使用泛型的类(多是集合)
+> public <Class><? extends Number> print
+>  (<Class><? extends Number> a, 
+>   <Class><? extends Number> b)
+> ```
+
+
+
+
+
+
+
+## HashMap 设计与实现
+
+### 前情提要
 
 > 1. **equals 方法**
 >
@@ -67,248 +169,254 @@
 >    >
 >    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
 
-#### 阈值( threshold )和负载因子( loadFactor ) 和 初始化
+### 阈值( threshold )和负载因子( loadFactor ) 和 初始化
 
-+ **源码**
+#### 源码
 
-  ```java
-  // HashMap 中 初始化操作的字段
-  int threshold;
-  final float loadFactor;
-  int modCount;
-  int size;
-  ```
-
-  
-
-+ **讲解**
-
-  > 1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括`拉链存储`的键值对 )
-  >
-  >    ```java
-  >    threshold = length * loadFactor;
-  >    ```
-  >
-  > 2. **loadFactor** 是对`空间和时间`的一个取舍
-  >
-  >    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
-  >    > 2. **loadFactor** 越大, 则与上述相反
-  >
-  > 3. **length** 是 hashMap 实际长度( 不包括`拉链存储` 的键值对 )
-  >
-  >    > 1. **length** 初始化为 16
-  >    >
-  >    > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
-  >    >
-  >    >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
-  >    >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
-  >    >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
-  >
-  > 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
-  >
-  > 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
-  >
-  > 6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
-
-#### 寻址
-
-+ **示意图**
-
-  ![45205ec2](Java.assets/45205ec2.png)
-
-+ **主要步骤**
-
-  > 1. 计算 **Key** 的 `hashCode` 
-  >
-  > 2. **高位运算 + 异或运算**, 得到新的 `hashCode`
-  >
-  > 3. 最后进行 `取模运算`, 得到最终的地址
-  >
-  >    > 1. 因为 **length** 总是 **2的n次方**, 所以对 **length-1** 的`按位与` 运算等价于 `取模运算`
-  >    >
-  >    >    ```java
-  >    >    // 当且仅当 b为2的n次方时成立
-  >    >    a % b == a & (b - 1);
-  >    >    ```
-  >    >
-  >    > 
-  >    >
-  >    > 2. 但是 `按位与` 运算比 `取模运算` 更快
-
-+ **源码**
-
-  ```java
-  static final int hash(Object key) {
-      int h;
-      
-      // 计算一次 hashCode, 然后右移16位( 取高位数值 )
-      // 将原来的 hashCode 与右移的 hashCode 做 异或运算
-      // 得到最终的 hashCode
-      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
-  }
-  
-  // 取模运算, 根据 hashCode 得到实际在 hashMap 中的位置
-  static int indexFor(int h, int length) {
-       return h & (length-1); 
-  }
-  ```
+```java
+// HashMap 中 初始化操作的字段
+int threshold;
+final float loadFactor;
+int modCount;
+int size;
+```
 
 
 
-#### 插入
+#### 讲解
 
-+ **示意图**
-
-  <img src="Java.assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
-
-+ **主要步骤**
-
-  > 1. 如果该位置 `没有元素` , 则直接插入
-  > 2. 如果有元素, 则逐个元素调用 `equals()` 方法
-  > 3. 返回 **true** 则 `直接覆盖` ; 返回 **false** 则在 `尾部插入`
-  > 4. 如果链表长度 大于**8**, 则 `树化为红黑树`, 然后插入
-  > 5. 如果插入后 **size > threshold** , 则扩容
-
-+ **源码**
-
-  ```java
-  public V put(K key, V value) {
-      
-      // 对 key 的 hashCode() 做 hash
-      // 然后使用 putVal
-      return putVal(hash(key), key, value, false, true);
-  }
-  
-  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                 boolean evict) {
-      
-      Node<K,V>[] tab; Node<K,V> p; int n, i;
-      
-      // 1.lazy-Load, 即 真正放入元素时 才初始化 hashMap
-      if ((tab = table) == null || (n = tab.length) == 0)
-          n = (tab = resize()).length;
-      
-      // 2.计算地址, 如果该位置为空
-      //   即没有相同的 Key, 则直接插入
-      if ((p = tab[i = (n - 1) & hash]) == null)
-          tab[i] = newNode(hash, key, value, null);
-      
-      else {
-          Node<K,V> e; K k;
-          
-          // 3.如果存在相同的 Key 和 Value ,则直接覆盖
-          if (p.hash == hash &&
-              ((k = p.key) == key || (key != null && key.equals(k))))
-              e = p;
-          
-          // 4. 否则判断是否为 红黑树
-          // 	  是则插入到树中
-          else if (p instanceof TreeNode)
-              e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-          
-          else {
-              
-              // 5. 否则遍历链表, 查看是否存在相同的 Value
-              for (int binCount = 0; ; ++binCount) {
-                  if ((e = p.next) == null) {
-                      p.next = newNode(hash, key, value, null);
-                      
-                      // 链表长度大于8, 转换为红黑树
-                      if (binCount >= TREEIFY_THRESHOLD - 1)
-                          treeifyBin(tab, hash);
-                      break;
-                  }
-                  
-                  // 存在相同的 Key 和 Value
-                  // 则直接覆盖
-                  if (e.hash == hash &&
-                      ((k = e.key) == key || 
-                       (key != null && key.equals(k))))
-                      break;
-                  
-                  // 不存在则在尾部插入
-                  p = e;
-              }
-          }
-          if (e != null) { // existing mapping for key
-              V oldValue = e.value;
-              if (!onlyIfAbsent || oldValue == null)
-                  e.value = value;
-              afterNodeAccess(e);
-              return oldValue;
-          }
-      }
-      ++modCount;
-      
-      // 超过最大容量 就扩容
-      if (++size > threshold)
-          resize();
-      afterNodeInsertion(evict);
-      return null;
-  }
-  
-  ```
-
-  
+> 1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括`拉链存储`的键值对 )
+>
+>    ```java
+>    threshold = length * loadFactor;
+>    ```
+>
+> 2. **loadFactor** 是对`空间和时间`的一个取舍
+>
+>    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
+>    > 2. **loadFactor** 越大, 则与上述相反
+>
+> 3. **length** 是 hashMap 实际长度( 不包括`拉链存储` 的键值对 )
+>
+>    > 1. **length** 初始化为 16
+>    >
+>    > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
+>    >
+>    >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
+>    >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
+>    >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
+>
+> 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
+>
+> 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
+>
+> 6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
 
 
 
-#### 扩容
+### 寻址
 
-+ **示意图( JDK1.7 )**
+#### 示意图
 
-  ![b2330062](Java.assets/b2330062.png)
+![45205ec2](Java.assets/45205ec2.png)
 
-  > 1. 链表在扩容之后发生 `倒置` , 因为 **Java7** 采用的是 `头插法`, **Java8** 不会
-  > 2. 每一个元素都要进行 `重新哈希` , 比较耗时. **Java8** 采用比较巧妙的方法解决此问题
+#### 主要步骤
 
-+ **不需要重新哈希的方法**
-
-  <img src="Java.assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
-
-  > 1. **length** 总是 2的n次方, 即当发生扩容时, length 只会增加一位 1
-  >
-  >    ```java
-  >    1111(16) --> 0001 1111(32)
-  >    ```
-  >
-  > 2. 那么, 只需要根据元素 **原来的哈希值** 在 **length** 新增加的那一位 `是否为 1`, 即可判断该元素 `是否需要移动位置( 1则需要移动, 0 则不需要)`
-  >
-  > 3. 如果需要移动, 那么
-  >
-  >    ```java
-  >    // 因为 newIndex = hash & (length - 1)
-  >    // hash 是不会变的, 
-  >    // 那么 newIndex 只跟 length - 1有关
-  >    newIndex = oldIndex + oldCap;
-  >    ```
-  >
-  > 
+> 1. 计算 **Key** 的 `hashCode` 
+>
+> 2. **高位运算 + 异或运算**, 得到新的 `hashCode`
+>
+> 3. 最后进行 `取模运算`, 得到最终的地址
+>
+>    > 1. 因为 **length** 总是 **2的n次方**, 所以对 **length-1** 的`按位与` 运算等价于 `取模运算`
+>    >
+>    >    ```java
+>    >    // 当且仅当 b为2的n次方时成立
+>    >    a % b == a & (b - 1);
+>    >    ```
+>    >
+>    > 
+>    >
+>    > 2. 但是 `按位与` 运算比 `取模运算` 更快
 
 
 
+#### 源码
 
-#### 红黑树
+```java
+static final int hash(Object key) {
+    int h;
+    
+    // 计算一次 hashCode, 然后右移16位( 取高位数值 )
+    // 将原来的 hashCode 与右移的 hashCode 做 异或运算
+    // 得到最终的 hashCode
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
 
-##### 前情提要
-
-+ **二叉查找树**
-
-  <img src="Java.assets/Screenshot%20from%202021-05-23%2017-18-49.png" alt="Screenshot from 2021-05-23 17-18-49" style="zoom:50%;" />
-
-  > 1. 左结点 `一定小于` 右结点
-  >
-  > 2. 当存在 **1,2,3,4,5,6,7,8** 这样的数据, 二叉查找树 `退化为 链表` 
-  >
-  >    > 查找性能由 `O(log n)` 退化为 `O(n)`
-  >
-  > 3. 为了解决这个问题 , 提出了 `平衡二叉树`, `红黑树` 就是一种平衡二叉树
-  >
-  >    > **平衡二叉树** 保证了 `树的高度(查找速度) 为 O(log n)`
-
+// 取模运算, 根据 hashCode 得到实际在 hashMap 中的位置
+static int indexFor(int h, int length) {
+     return h & (length-1); 
+}
+```
 
 
-##### 基本属性
+
+### 插入
+
+#### 示意图
+
+<img src="Java.assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
+
+
+
+#### 主要步骤
+
+> 1. 如果该位置 `没有元素` , 则直接插入
+> 2. 如果有元素, 则逐个元素调用 `equals()` 方法
+> 3. 返回 **true** 则 `直接覆盖` ; 返回 **false** 则在 `尾部插入`
+> 4. 如果链表长度 大于**8**, 则 `树化为红黑树`, 然后插入
+> 5. 如果插入后 **size > threshold** , 则扩容
+
+
+
+#### 源码
+
+```java
+public V put(K key, V value) {
+    
+    // 对 key 的 hashCode() 做 hash
+    // 然后使用 putVal
+    return putVal(hash(key), key, value, false, true);
+}
+
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+               boolean evict) {
+    
+    Node<K,V>[] tab; Node<K,V> p; int n, i;
+    
+    // 1.lazy-Load, 即 真正放入元素时 才初始化 hashMap
+    if ((tab = table) == null || (n = tab.length) == 0)
+        n = (tab = resize()).length;
+    
+    // 2.计算地址, 如果该位置为空
+    //   即没有相同的 Key, 则直接插入
+    if ((p = tab[i = (n - 1) & hash]) == null)
+        tab[i] = newNode(hash, key, value, null);
+    
+    else {
+        Node<K,V> e; K k;
+        
+        // 3.如果存在相同的 Key 和 Value ,则直接覆盖
+        if (p.hash == hash &&
+            ((k = p.key) == key || (key != null && key.equals(k))))
+            e = p;
+        
+        // 4. 否则判断是否为 红黑树
+        // 	  是则插入到树中
+        else if (p instanceof TreeNode)
+            e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+        
+        else {
+            
+            // 5. 否则遍历链表, 查看是否存在相同的 Value
+            for (int binCount = 0; ; ++binCount) {
+                if ((e = p.next) == null) {
+                    p.next = newNode(hash, key, value, null);
+                    
+                    // 链表长度大于8, 转换为红黑树
+                    if (binCount >= TREEIFY_THRESHOLD - 1)
+                        treeifyBin(tab, hash);
+                    break;
+                }
+                
+                // 存在相同的 Key 和 Value
+                // 则直接覆盖
+                if (e.hash == hash &&
+                    ((k = e.key) == key || 
+                     (key != null && key.equals(k))))
+                    break;
+                
+                // 不存在则在尾部插入
+                p = e;
+            }
+        }
+        if (e != null) { // existing mapping for key
+            V oldValue = e.value;
+            if (!onlyIfAbsent || oldValue == null)
+                e.value = value;
+            afterNodeAccess(e);
+            return oldValue;
+        }
+    }
+    ++modCount;
+    
+    // 超过最大容量 就扩容
+    if (++size > threshold)
+        resize();
+    afterNodeInsertion(evict);
+    return null;
+}
+
+```
+
+
+
+### 扩容
+
+#### 示意图( JDK1.7 )
+
+![b2330062](Java.assets/b2330062.png)
+
+> 1. 链表在扩容之后发生 `倒置` , 因为 **Java7** 采用的是 `头插法`, **Java8** 不会
+> 2. 每一个元素都要进行 `重新哈希` , 比较耗时. **Java8** 采用比较巧妙的方法解决此问题
+
+
+
+#### 不需要重新哈希的方法
+
+<img src="Java.assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
+
+> 1. **length** 总是 2的n次方, 即当发生扩容时, length 只会增加一位 1
+>
+>    ```java
+>    1111(16) --> 0001 1111(32)
+>    ```
+>
+> 2. 那么, 只需要根据元素 **原来的哈希值** 在 **length** 新增加的那一位 `是否为 1`, 即可判断该元素 `是否需要移动位置( 1则需要移动, 0 则不需要)`
+>
+> 3. 如果需要移动, 那么
+>
+>    ```java
+>    // 因为 newIndex = hash & (length - 1)
+>    // hash 是不会变的, 
+>    // 那么 newIndex 只跟 length - 1有关
+>    newIndex = oldIndex + oldCap;
+>    ```
+>
+> 
+
+
+
+
+### 红黑树
+
+#### 二叉查找树
+
+<img src="Java.assets/Screenshot%20from%202021-05-23%2017-18-49.png" alt="Screenshot from 2021-05-23 17-18-49" style="zoom:50%;" />
+
+> 1. 左结点 `一定小于` 右结点
+>
+> 2. 当存在 **1,2,3,4,5,6,7,8** 这样的数据, 二叉查找树 `退化为 链表` 
+>
+>    > 查找性能由 `O(log n)` 退化为 `O(n)`
+>
+> 3. 为了解决这个问题 , 提出了 `平衡二叉树`, `红黑树` 就是一种平衡二叉树
+>
+>    > **平衡二叉树** 保证了 `树的高度(查找速度) 为 O(log n)`
+
+
+
+#### 基本属性
 
 > 1. 结点只有 `红色或黑色`
 >
@@ -338,13 +446,15 @@
 >    >    > 1. 因为插入的结点总是设为 `红色` , 故意破坏 **红黑树** 的约束, 从而通过 `旋转和变色` 来重新达到平衡
 >    >    > 2. 插入包含 **寻找插入位置** 和 **自平衡过程**, 前者是查找操作, 后者最坏的情况是对 `整棵树` 进行 **自平衡** , 所以总的复杂度是 `O( log n)`
 
-##### 旋转
+
+
+#### 旋转
 
 > 1. 全部旋转的**时间复杂度**都是 `O(1)`
 >
 >    > 1. 因为红黑树的存储一般使用 `链表` 
 
-###### **左旋**
+##### **左旋**
 
 + **示意图**
 
@@ -362,7 +472,9 @@
   >
   > 3. 即 **被左旋的结点** 作为 **其右结点 **的`左子树`
 
-###### **右旋**
+
+
+##### **右旋**
 
 + **示意图**
 
@@ -380,22 +492,26 @@
   >
   > 3. 即 **被右旋的结点** 作 为 **其左结点 **的`右子树`
 
-##### 插入策略
+#### 插入策略
 
-+ **Z 关系**
+##### Z 关系
 
 <img src="Java.assets/Screenshot%20from%202021-05-23%2020-37-15.png" alt="Screenshot from 2021-05-23 20-37-15" style="zoom:50%;" />
 
 > 1. Z 是要插入的结点
 > 2. 插入的结点总是 `红色` 的
 
-+ **Z 是根结点**
+
+
+##### Z 是根结点
 
 > 1. 将 Z 涂成 `黑色`
 >
 >    ![Untitled Diagram (5)](Java.assets/Untitled%20Diagram%20(5).png)
 
-+ **Z 的 uncle 是红色结点**
+
+
+##### Z 的 uncle 是红色结点
 
 > 1. 将 Z 的 **Uncle 和 Parent** 涂成`黑色`, 而 **Grandparent** 涂成`红色`
 >
@@ -403,7 +519,7 @@
 
 
 
-+ **Z 的 uncle 是黑色并且呈现 三角关系**
+##### Z 的 uncle 是黑色并且呈现 三角关系
 
 > 1. 其中 **Z, Z.Parent** 都是 `红色`
 >
@@ -417,7 +533,7 @@
 
 
 
-+ **Z 的 uncle 是黑色并且呈现 直线关系**
+#### Z 的 uncle 是黑色并且呈现 直线关系
 
 > 1. 其中 **Z, Z.Parent** 都是 `红色`
 >
@@ -431,112 +547,250 @@
 >
 > 3. 并且需要对 **Z.GrandParent** 和 **Z.Parent** 进行涂色
 
-##### 删除策略
 
-#### 线程安全问题
 
-##### **JDK 1.7**
+#### 删除策略
 
-+ **源码**
+
+
+### 线程安全问题
+
+#### **JDK 1.7**
+
+##### 源码
+
+```java
+void transfer(Entry[] newTable, boolean rehash){
+    int newCapacity = newTable.length;
+    for (Entry<K, V> e : table){
+        while(e != null){
+            
+            // 储存当前结点的下一个结点
+            // 因为之后会 断开 当前结点的 指向
+            Entry<K, V> next = e.next;
+            
+            if(rehash){
+                e.hash = null == e.key ? 0 : hash(e.key);
+            }
+            
+            // 计算新的储存位置
+            int i = indexFor(e.hash, newCapacity);
+            
+            // 若该位置为空, 则当前元素指向 null : null 结点
+            // 否则指向该位置存储的元素
+            // 相当于插入已有结点的前面, 即"头插法"
+            e.next = newTable[i];
+            newTable[i] = e;
+            
+            // 注意!!!
+            // 链表中的整个结点是不可能被覆盖的, 只能覆盖结点的值
+            // 当没有任何引用指向结点, 和结点不指向任何结点时
+            // 该结点会被垃圾回收, 称为 "删除结点"
+            
+            // 相当于普通循环中的 i++
+            e = next;
+        }
+    }
+}
+```
+
+
+
+##### 死循环
+
+> 1. 此时 **线程 A** 和 **线程 B** `同时触发`扩容机制
+>
+>    <img src="Java.assets/1553942282.jpeg" alt="1553942282" style="zoom:150%;" />
+>
+> 2. **线程 A** 将 **3** 解除指向, 此时操作系统 `进行了时间片轮询`
+>
+>    <img src="Java.assets/1553943048.jpeg" alt="1553943048" style="zoom:150%;" />
+>
+> 3. **线程 B** 完成了整个扩容, 此时操作系统 `进行了时间片轮询`. 
+>
+>    注意, 对于 **线程 A** 来说, `e = 3,  e.next = null, next = 7 , next.next = 3`
+>
+>    ![3](Java.assets/3.png)
+>
+> 4. **线程 A** 继续进行扩容, 将 **3** 又插入了链表的头部.
+>
+>    ![4](Java.assets/4.png)
+>
+> 5. 进入下一轮循环, 更新 `e = 7, next = 3` , 又将 **7** 插入链表头部
+>
+>    ![5 (1)](Java.assets/5%20(1).png)
+>
+> 6. 进入下一轮循环, 更新 `e = 3, next = null`, 又将 **3** 插入链表头部, 形成的 **3** 和 **7** 互指的场面, 即链表有环.
+>
+>    ![6 (1)](Java.assets/6%20(1).png)
+>
+> 7. 下一次进行查询时, 将会出现 `死循环`
+
+
+
+#### JDK 1.8
+
+##### 源码
+
+```java
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+               boolean evict) {
+    
+	//......
+    
+    // 计算地址, 如果该位置为空
+    // 即没有相同的 Key, 则直接插入
+    if ((p = tab[i = (n - 1) & hash]) == null)
+        
+        // 如果该位置存在结点
+        // 会使原来的结点即不指向任何结点, 也没有结点指向它
+        // 即该节点被删除了
+        tab[i] = newNode(hash, key, value, null);
+    
+    //.....
+}
+
+```
+
+
+
+##### 数据丢失问题
+
+> 1. 当 **线程 A**  对 **位置 1 ( 原本没有数据 )** 进行数据插入时, 操作系统 `进行时间片轮询`
+> 2. **线程 B** 对 **位置 1** 完成了数据插入, 操作系统 `进行时间片轮询`
+> 3. 此时 **线程 A** 对 **位置 1** 完成数据插入, 覆盖了 **线程 2 的数据**
+
+
+
+## 集合技巧
+
+### Lambda 技巧
+
+#### 综述
+
+> 1. **lambda : 函数式编程**, 即把一个函数当成是参数传入
+> 2. 因为 **lambda** 可以`自动推断参数的类型`, 所以写参数的时候可以`不用声明类型`
+> 3. **例子** : (para1,para2) -> { 函数具体实现 }
+
+
+
+#### 集合中的应用
+
+> 1. 使用 **lambda** 可以很方便的将一个类传入方法中, 省去了以前使用 `匿名内部类` 的形式
+> 2. 这种方法仅当该类 `只有一个方法的时候` 可以使用
+
+
+
+#### forEach 遍历方法
+
++ **综述**
+
+  > 1. **forEach** 传入`一个参数(集合里面的值)`, **没有返回值**
+  > 2. 对于具体实现 `只有一个方法的情况`, 可以直接`传一个静态方法`
+  > 3. 在 **forEach** 形式的循环中 `无法更新` 集合的数据
+
++ **例子**
 
   ```java
-  void transfer(Entry[] newTable, boolean rehash){
-      int newCapacity = newTable.length;
-      for (Entry<K, V> e : table){
-          while(e != null){
-              
-              // 储存当前结点的下一个结点
-              // 因为之后会 断开 当前结点的 指向
-              Entry<K, V> next = e.next;
-              
-              if(rehash){
-                  e.hash = null == e.key ? 0 : hash(e.key);
-              }
-              
-              // 计算新的储存位置
-              int i = indexFor(e.hash, newCapacity);
-              
-              // 若该位置为空, 则当前元素指向 null : null 结点
-              // 否则指向该位置存储的元素
-              // 相当于插入已有结点的前面, 即"头插法"
-              e.next = newTable[i];
-              newTable[i] = e;
-              
-              // 注意!!!
-              // 链表中的整个结点是不可能被覆盖的, 只能覆盖结点的值
-              // 当没有任何引用指向结点, 和结点不指向任何结点时
-              // 该结点会被垃圾回收, 称为 "删除结点"
-              
-              // 相当于普通循环中的 i++
-              e = next;
-          }
-      }
-  }
+  List<Integer> list = new ArrayList<>();
+  Set<Integer> set = new HashSet<>();
+  Map<Integer, Integer> map = new HashMap<>();
+  
+  // list 和 set 的例子
+  list/set.forEach(value->{
+      /* 
+      	Code Here
+      */
+  });
+  list/set.forEach(System.out::println);
+  
+  // map 的例子
+  map.forEach((key, value)->{
+      /* 
+      	Code Here
+      */
+  });
   ```
 
   
 
-+ **死循环**
+#### List
 
-  > 1. 此时 **线程 A** 和 **线程 B** `同时触发`扩容机制
-  >
-  >    <img src="Java.assets/1553942282.jpeg" alt="1553942282" style="zoom:150%;" />
-  >
-  > 2. **线程 A** 将 **3** 解除指向, 此时操作系统 `进行了时间片轮询`
-  >
-  >    <img src="Java.assets/1553943048.jpeg" alt="1553943048" style="zoom:150%;" />
-  >
-  > 3. **线程 B** 完成了整个扩容, 此时操作系统 `进行了时间片轮询`. 
-  >
-  >    注意, 对于 **线程 A** 来说, `e = 3,  e.next = null, next = 7 , next.next = 3`
-  >
-  >    ![3](Java.assets/3.png)
-  >
-  > 4. **线程 A** 继续进行扩容, 将 **3** 又插入了链表的头部.
-  >
-  >    ![4](Java.assets/4.png)
-  >
-  > 5. 进入下一轮循环, 更新 `e = 7, next = 3` , 又将 **7** 插入链表头部
-  >
-  >    ![5 (1)](Java.assets/5%20(1).png)
-  >
-  > 6. 进入下一轮循环, 更新 `e = 3, next = null`, 又将 **3** 插入链表头部, 形成的 **3** 和 **7** 互指的场面, 即链表有环.
-  >
-  >    ![6 (1)](Java.assets/6%20(1).png)
-  >
-  > 7. 下一次进行查询时, 将会出现 `死循环`
-
-##### JDK 1.8
-
-+ **源码**
++ **sort 排序方法重写**
 
   ```java
-  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                 boolean evict) {
-      
-  	//......
-      
-      // 计算地址, 如果该位置为空
-      // 即没有相同的 Key, 则直接插入
-      if ((p = tab[i = (n - 1) & hash]) == null)
-          
-          // 如果该位置存在结点
-          // 会使原来的结点即不指向任何结点, 也没有结点指向它
-          // 即该节点被删除了
-          tab[i] = newNode(hash, key, value, null);
-      
-      //.....
-  }
+  List<Integer> list = new ArrayList<>();
+  /*
+  	list.add ...... 
+  */
+  
+  // sort 方法默认输入两个参数(集合里面相邻的两个值), 返回一个值
+  // 小于则返回 负数, 等于则返回 0, 大于则返回 正数
+  
+  // sort 默认的情况是升序排序
+  // 这里将 升序改为降序
+  // 只需要将 o1,o2 的参数比较的顺序序调转即可
+  
+  list.sort((o1, o2) -> return Integer.compare(o2, o1));
+  ```
+
+
+
+### 遍历中删除元素的技巧
+
+```java
+List<Integer> list = new ArrayList<>();
+/*
+	list.add ...... 
+*/
+Set<Integer> set = new HashSet<>();
+/* 
+	set.add ......
+*/
+Map<Integer, Integer> map = new HashMap<>();
+/* 
+	map.put ......
+*/
+
+// Map 生成 EntrySet, 即 一个 Set 存储的元素是 Entry
+// 然后再对这个 Set 生成一个 迭代器( Iterator )
+Iterator<Map.Entry<String, Integer>> iterator = maps.entrySet().iterator();
+
+// List 和 Set 就相对简单
+Iterator<Integer> iterator = list/set.iterator();
+
+while(iterator.hasNext()){
+    // 先取出 迭代器指向的元素
+    // 调用 next() 方法, 迭代器会取出当前元素, 然后自动指向下一个元素
+    Map.Entry<String, Integer> next = iterator.next();
+     
+    // 删除集合中的元素, 即删除上面取出的 next() 元素
+    // 调用 remove() 方法, 迭代器会在集合中删除 最近一次取出的元素
+    iterator.remove();
+    
+}
+```
+
+
+
+### Map
+
++ **Map 转 List / Set**
+
+  ```java
+  Map<String, Integer> maps = new HashMap<>();
+  
+  // Map 生成 entrySet, 即一个 Set 集合, 里面存放的元素是 Entry 类型
+  // 然后复制到 List 或者 Set 中
+  List/Set<Map.Entry<String, Integer>> entryArrayList = new ArrayList/HashSet<>(maps.entrySet());
   
   ```
 
   
 
-+ **数据丢失问题**
 
-  > 1. 当 **线程 A**  对 **位置 1 ( 原本没有数据 )** 进行数据插入时, 操作系统 `进行时间片轮询`
-  > 2. **线程 B** 对 **位置 1** 完成了数据插入, 操作系统 `进行时间片轮询`
-  > 3. 此时 **线程 A** 对 **位置 1** 完成数据插入, 覆盖了 **线程 2 的数据**
+
+
 
 
 
@@ -759,7 +1013,7 @@ new ThreadPoolExecutor(corePoolSize,
 
 
 
-## CAS
+## CAS 操作
 
 > 1. **CAS** 全称 **CompareAndSwap** 
 >
@@ -774,249 +1028,106 @@ new ThreadPoolExecutor(corePoolSize,
 
 
 
-## 对象向上和向下转型
+## Java 的各种锁
 
-+ **向上转型**
+### 前情提要
 
-  + **例子**
-
-    > ```java
-    > // class Apple extend Fruit
-    > Fruit fruit = new Apple();
-    > ```
-    >
-    > 1. 此时 `fruit` 引用了 `Fruit` 的子类, 称为向上转型
-    > 2. `fruit` 可以调用 `Apple 类` 中属于 `Fruit 类` 的属性和方法`( 如果方法被重写, 那么调用的是重写后的方法 )`.
-    > 3. `fruit` 无法调用 `Apple 类` 中不属于 `Fruit 类` 的属性和方法
-
-  + **应用**
-
-    > ```java
-    > //class Apple extend Fruit
-    > class Test{
-    >     public void main(){
-    >         run(new Fruit());
-    >         run(new Apple());
-    >     }
-    >     
-    >     private void run(Fruit fruit){
-    >         fruit.anymethod();
-    >     }
-    >     
-    > }
-    > ```
-    >
-    > 1. 上述例子通过 `向上转型` , 省去了 `run` 方法的重载.
-
-+ **向下转型**
-
-  + **例子**
-
-    > ```java
-    > // class Apple,Orange extend Fruit
-    > Fruit fruit = new Apple(); //向上转型
-    > Apple apple = (Apple) fruit; // (Apple) fruit 称为向下转型, 不会报错
-    > 
-    > Fruit fruit = new Apple();// 向上转型
-    > Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
-    > ```
-
----
-
-## 泛型( Generics )
-
-+ **综述**
-
-  > 1. `泛型` 是指 类, 接口或者方法使用 `类型(Types)` 进行初始化, 通常用于编写 `集合/容器` 类.
-
-  > 1. `Java` 着重于`类型安全(Type Safe)`, 大部分 `类型错误` 会在`编译期`被发现, 但是如果使用`强制类型转换`, 这种错误很难在编译期发现.  
-  > 2. `Java 5` 之前, 一般使用 `Object` 实现 `泛型` 功能, 但是需要使用 `强制类型转换`, 带来很大的 `安全隐患`.
-  > 3. `Java 5` 之后, 引入 `<>` 的方法, 在编译期就可以发现`类型错误`.
-
-+ **例子**
-
-  > 1. **泛型类**
-  >
-  >    > ```java
-  >    > public class Test<T> {
-  >    >     private T val;
-  >    >     
-  >    >     public T getVal() {
-  >    >         return val;
-  >    >     }
-  >    >     public T setVal(T val) {
-  >    >         this.val = val;
-  >    >     }
-  >    > }
-  >    > ```
-  >    >
-  >    > 
-  >
-  > 2. **泛型方法**
-  >
-  >    > ```java
-  >    > // <Class> 是使用泛型的类(多是集合)
-  >    > public <T> <Class><T> print(Test<T> a, Test<T> b){}
-  >    > ```
-  >    >
-  >    > 
-
-+ **通配符**
-
-  + **综述**
-
-    > 1. 通常用于 `泛型方法` 中传入参数
-
-  + **用法**
-
-    > 1. 上界通配符
-    >
-    >    <img src="Java.assets/upper%20bound.png" alt="upper bound" style="zoom:150%;" />
-    >
-    > 2. 下界通配符
-    >
-    >    <img src="Java.assets/lower%20bound.png" alt="lower bound" style="zoom:150%;" />
-
-  + **例子**
-
-    > ```java
-    > // <Class> 是使用泛型的类(多是集合)
-    > public <Class><? extends Number> print
-    >     (<Class><? extends Number> a, 
-    >      <Class><? extends Number> b)
-    > ```
+> 1. 线程 **被阻塞** 的时候`不会消耗 CPU 性能`, 但是 **执行阻塞和唤醒** 的时候会`很消耗 CPU 性能`
+>
+>    > 1. 因为阻塞和唤醒涉及 **线程等待队列** 的 `入队和出队, 上下文切换` 等操作, **消耗非常昂贵**
+>
+> 2. 如果线程占用锁的`时间比较少`, 使用 `线程自旋` 等技术, 因为**不会涉及阻塞和唤醒 **动作的发生, 比 **方法1** 性能更好
+>
+>    > 1. **自旋**是指, 线程执行死循环一段时间, 直到操作执行成功. 消耗一点 CPU 性能, 避免了 **阻塞和唤醒**
+>    > 2. 常见实现是 `死循环 + CAS 操作`
+>
+> 3. 所以在涉及线程并发的时候, **如果线程数较少, 或者 读多写少 情况**, 应该尽量避免 `线程阻塞和唤醒` , 多采用 `自旋` 等方式. 相反则应该使用 `锁`
 
 
 
----
+### 乐观锁 和 悲观锁
 
-## 集合技巧
-
-### Lambda 技巧
-
-+ **综述**
-
-  > 1. **lambda : 函数式编程**, 即把一个函数当成是参数传入
-  > 2. 因为 **lambda** 可以`自动推断参数的类型`, 所以写参数的时候可以`不用声明类型`
-  > 3. **例子** : (para1,para2) -> { 函数具体实现 }
-
-+ **集合中的应用**
-
-  > 1. 使用 **lambda** 可以很方便的将一个类传入方法中, 省去了以前使用 `匿名内部类` 的形式
-  > 2. 这种方法仅当该类 `只有一个方法的时候` 可以使用
+> 1. 两者都是指 **多线程** 中解决`资源竞争`的思想, **不是具体代码**
+>
+> 2. **乐观锁**是指, 认为 **没有其他线程, 或者只有少量的线程** 会竞争资源, 所以只在**执行具体操作**的时候才判断有无 `竞争资源问题` 
+>
+>    > 1. 常见实现有 `CAS, 无锁/自旋锁`
+>    > 2. 乐观锁 has ( 无锁, 自旋锁, CAS )
+>
+> 3. **悲观锁**是指, **肯定会出现线程竞争问题**, 所以在操作资源之前, `预先上锁`
+>
+>    > 1. 常见实现有 `轻/重量级锁`
 
 
 
-#### forEach 遍历方法
+### 自旋锁 和 适应性自旋锁
 
-+ **综述**
-
-  > 1. **forEach** 传入`一个参数(集合里面的值)`, **没有返回值**
-  > 2. 对于具体实现 `只有一个方法的情况`, 可以直接`传一个静态方法`
-  > 3. 在 **forEach** 形式的循环中 `无法更新` 集合的数据
-
-+ **例子**
-
-  ```java
-  List<Integer> list = new ArrayList<>();
-  Set<Integer> set = new HashSet<>();
-  Map<Integer, Integer> map = new HashMap<>();
-  
-  // list 和 set 的例子
-  list/set.forEach(value->{
-      /* 
-      	Code Here
-      */
-  });
-  list/set.forEach(System.out::println);
-  
-  // map 的例子
-  map.forEach((key, value)->{
-      /* 
-      	Code Here
-      */
-  });
-  ```
-
-  
-
-#### List
-
-+ **sort 排序方法重写**
-
-  ```java
-  List<Integer> list = new ArrayList<>();
-  /*
-  	list.add ...... 
-  */
-  
-  // sort 方法默认输入两个参数(集合里面相邻的两个值), 返回一个值
-  // 小于则返回 负数, 等于则返回 0, 大于则返回 正数
-  
-  // sort 默认的情况是升序排序
-  // 这里将 升序改为降序
-  // 只需要将 o1,o2 的参数比较的顺序序调转即可
-  
-  list.sort((o1, o2) -> return Integer.compare(o2, o1));
-  ```
+> 1. **自旋锁** 是指, 多个线程并发时, **不对资源上锁**, 而是`让线程短时间自旋`, 直到获得锁. 即同时`只有一个线程`可以做出修改. 
+>
+>    > 1. 一般使用 `循环 + CAS 操作` 实现
+>    > 2. 自旋锁 属于 乐观锁
+>
+> 2. **适应性自旋锁** 是指, 系统会判断自旋 **是否会在短时间内获得 锁**, 不行则使用 `阻塞和唤醒` 等操作
 
 
 
-### 遍历中删除的技巧
+### 无锁 , 偏向锁, 轻量级锁, 重量级锁
 
-```java
-List<Integer> list = new ArrayList<>();
-/*
-	list.add ...... 
-*/
-Set<Integer> set = new HashSet<>();
-/* 
-	set.add ......
-*/
-Map<Integer, Integer> map = new HashMap<>();
-/* 
-	map.put ......
-*/
-
-// Map 生成 EntrySet, 即 一个 Set 存储的元素是 Entry
-// 然后再对这个 Set 生成一个 迭代器( Iterator )
-Iterator<Map.Entry<String, Integer>> iterator = maps.entrySet().iterator();
-
-// List 和 Set 就相对简单
-Iterator<Integer> iterator = list/set.iterator();
-
-while(iterator.hasNext()){
-    // 先取出 迭代器指向的元素
-    // 调用 next() 方法, 迭代器会取出当前元素, 然后自动指向下一个元素
-    Map.Entry<String, Integer> next = iterator.next();
-     
-    // 删除集合中的元素, 即删除上面取出的 next() 元素
-    // 调用 remove() 方法, 迭代器会在集合中删除 最近一次取出的元素
-    iterator.remove();
-    
-}
-```
+> 1. 四个锁都是针对 `Synchronized` 关键词的. 锁 `可以升级` 并且升级过程`只能从左往右`.
+>
+> 2. 无锁 == 自旋锁
+>
+> 3. **偏向锁**是指, 默认自始至终`只有一个线程`在使用共享资源, 即不会去锁任何的资源, 也就没有 **阻塞和唤醒** 等动作的发生. 但是, 一旦有**第二个线程竞争**, 就立即膨胀为 `轻量级锁`
+>
+>    > 1. 设计的初衷就是不要`一上来就去锁资源`, 而是从**最乐观的角度**出发, 直到出现线程竞争才升级锁
+>
+> 4. **轻量级锁 **是指, **新来的线程** 通过 `自旋` 来获取锁. 即一个线程持有 **轻量级锁** , 另外一个线程 `自旋等待`. 如果有 **第三个线程竞争**, 则升级为 `重量级锁`
+>
+> 5. **重量级锁** 是指, 对于等待的线程, 使用 `阻塞和唤醒` 等动作管理
 
 
 
+### 公平锁 和 非公平锁
+
+> 1. **公平锁** 是指, 先到 **等待队列** 排队的线程先拿到锁. 即严格遵守 `队列先进先出`
+>
+> 2. **非公平锁** 是指, 等待线程 `同时抢夺锁`, 先等待的线程**未必**先拿到锁
+>
+>    > 1. 会导致 `饥饿问题`
 
 
-### Map
 
-+ **Map 转 List / Set**
+### 可重入锁 VS 非可重入锁
 
-  ```java
-  Map<String, Integer> maps = new HashMap<>();
-  
-  // Map 生成 entrySet, 即一个 Set 集合, 里面存放的元素是 Entry 类型
-  // 然后复制到 List 或者 Set 中
-  List/Set<Map.Entry<String, Integer>> entryArrayList = new ArrayList/HashSet<>(maps.entrySet());
-  
-  ```
+#### 前情提要 -- Synchronized 究竟锁什么
 
-  
+> 1. **锁普通方法** : 此时锁的是 `实例对象`
+> 2. **锁静态方法** : 此时锁的是 `类`
 
----
+#### 讲解
+
+> 1. **可重入锁** 是指, 获得锁的线程可以执行**所有**的 `内层方法`
+>
+>    > 1. 例如, 获得实例对象锁, 可以执行**该对象里** `所有带锁的普通方法`. 获得 **类锁**, 可以执行 **该类**`所有带锁的静态方法`
+>    > 2. 可以有效避免 `死锁`. 即当出现 **带锁方法** `互相调用的时候 `, 不会因为两个线程 **各持一锁** 而形成 `死锁`
+>
+> 2. 那么 **非重入锁** 就是反过来
+
+
+
+### 独享锁 和 公平锁
+
+> 1. 两者均是指 `编程思想`
+>
+> 2. **独享锁** 是指, 一个锁一次 **只能** 被`一个线程`所持有. 该线程可以实现 `读写`
+>
+>    > 1. 实现 : **Synchronized** 和 **Lock**
+>
+> 3. **共享锁** 是指, 一个锁可以被`多个线程`持有. 但是只要有一个线程加上 **共享锁** 后, 其他线程也只能加 **共享锁**. 这些线程只能 `读`
+>
+>    > 1. 其中, **读读共享**, `读写, 写读, 写写 互斥`
+
+
 
 ## JVM ( Java Virtual Machine )
 
@@ -1500,6 +1611,48 @@ while(iterator.hasNext()){
 
 
 
+## 网络
+
+### TCP 三次握手
+
+#### 流程图
+
+![sanci](Java.assets/sanci.png)
+
+#### 步骤
+
+> 1. **第一次握手**是指, 客户端发送 **SYN=1， seq=x( 随机生成 )**. 客户端进入 `SYN-SENT 状态`
+>
+> 2. **第二次握手**是指, 服务端接受后, 发送 **SYN=1, ACK=1, seq=y( 随机生成 ), ack=x+1**, 服务端进入 `SYN-RCVD 状态`
+>
+>    > 1. 发出的 `ack = 接收的 seq +1`
+>    > 2. 即 希望对方从 `seq + 1` 开始发送数据
+>
+> 3. **第三次握手**是指, 客户端接受后, 发送 **ACK=1, seq=x+1, ack=y+1**, 进入 `EXTABLISHED 状态`
+>
+>    > 1. 发出的 `seq = 接收的 ack`
+>
+> 4. 服务端接受后, 也进入 `EXTABLISHED 状态`
+
+
+
+### TCP 四次挥手
+
+<img src="Java.assets/sici-1622277304896.png" alt="sici"  />
+
+#### 步骤
+
+> 1. **第一次挥手**, 客户端 发送 **FIN=1, seq=u( 随机生成 )**, 进入 `FIN-WAIT-1 状态`
+> 2. **第二次挥手**, 服务端 接收后, 发送 **ACK=1, seq=v( 随机生成 ), ack=u+1**, 检查`是否还有数据要发送`, 然后进入 `CLOSE-WAIT 状态`
+> 3. **客户端** 接收后进入 `FIN-WAIT-2 状态`
+> 4. **第三次挥手**, 服务端 发送数据后, 发送 **FIN=1 , ACK=1, seq=w( 随机生成 ), ack=u+1**, 进入 `LAST-ACK 状态`
+> 5. 第四次挥手, 客户端 接收后, 发送 **ACK=1, seq=u+1, ack=w+1**, 进入 `TIME-WAIT 倒计时状态`, 倒计时结束后`关闭连接`
+> 6. **服务端 **收到后`关闭连接`
+
+
+
+
+
 ## 设计模式
 
 
@@ -1635,541 +1788,35 @@ while(iterator.hasNext()){
 >    > 1. 前两者 **插入删除尾部元素** 也是快的
 >    > 2. 因为不会触发 `扩容和缩容` 
 
-## Hashtable、HashMap、TreeMap
+## Hashtable、HashMap、TreeMap 的区别
 
-### **综述**
+#### HashTable
 
-> 1. **HashTable** 早期使用, 目前多用 **HashMap**
+> 1. **HashTable** `早期使用`, 目前多用 **HashMap**
 >
->    > 1. HashTable 是线程安全的, 实现方法是把 `put, get ,size` 等方法加锁
+> 2. **HashTable** 是线程安全的, 实现方法是把 `put, get ,size` 等方法加锁
+
+
+
+#### HashMap
+
+> 1. 支持 `null 键值`
+> 2. **无序存储**
+> 3. **插入和访问** 的复杂度为 `常数`
+
+
+
+#### TreeMap
+
+> 1. 不支持 `null 键值`
 >
-> 2. **HashMap**
+>    > 1. 因为需要实现 `Comparable 或 Comparator` 接口
 >
->    > 1. 支持 `null 键值`
->    > 2. **无序存储**
->    > 3. **插入和访问** 的复杂度为 `常数`
+> 2. **有序存储**, 但是是通过 `键的顺序` 排序的
 >
-> 3. **TreeMap**
+> 3. **CURD** 的时间复杂度为 `log(n)`
 >
->    > 1. 不支持 `null 键值`
->    >
->    >    > 1. 因为需要实现 `Comparable 或 Comparator` 接口
->    >
->    > 2. **有序存储**, 但是是通过 `键的顺序` 排序的
->    >
->    > 3. **CURD** 的时间复杂度为 `log(n)`
->    >
->    >    > 1. 因为底层使用 `红黑树` 实现
-
-### HashMap 设计与实现
-
-#### 前情提要
-
-> 1. **equals 方法**
->
->    > 1. 没有覆写, 则比较两个对象的 `地址` 是否相等
->    >
->    > 2. 覆写后, 用于比较两个对象的 `值` 是否相等
->    >
->    >    ```java
->    >    int a=1;
->    >    int b=1;
->    >    
->    >    // 没有覆写
->    >    a.equals(b); // 结果为 false
->    >    
->    >    // 覆写为比较两个对象的 值
->    >    a.equals(b); // 结果为 true
->    >    ```
->    >
->    >    
->
-> 2. **hashCode 方法**
->
->    > 1. 输入对象的 **地址**, 输出 `一个整数`
->    >
->    >    > 1. 一般的来说, 就是把 **任意长度的输入, 变换为固定长度的输出**
->    >
->    > 2. 不同的输入可能会 `导致相同的输出`
->
-> 3. 两者在 **HashMap** 中的约束
->
->    > 1. **equals()** 相等, 则 **hashCode()** 也要相等
->    >
->    > 2. 重写 **hashCode()** , 也要重写 **equals()**
->    >
->    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
-
-#### 阈值( threshold )和负载因子( loadFactor ) 和 初始化
-
-+ **源码**
-
-  ```java
-  // HashMap 中 初始化操作的字段
-  int threshold;
-  final float loadFactor;
-  int modCount;
-  int size;
-  ```
-
-  
-
-+ **讲解**
-
-  > 1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括`拉链存储`的键值对 )
-  >
-  >    ```java
-  >    threshold = length * loadFactor;
-  >    ```
-  >
-  > 2. **loadFactor** 是对`空间和时间`的一个取舍
-  >
-  >    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
-  >    > 2. **loadFactor** 越大, 则与上述相反
-  >
-  > 3. **length** 是 hashMap 实际长度( 不包括`拉链存储` 的键值对 )
-  >
-  >    > 1. **length** 初始化为 16
-  >    >
-  >    > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
-  >    >
-  >    >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
-  >    >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
-  >    >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
-  >
-  > 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
-  >
-  > 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
-  >
-  > 6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
-
-#### 寻址
-
-+ **示意图**
-
-  ![45205ec2](Java.assets/45205ec2.png)
-
-+ **主要步骤**
-
-  > 1. 计算 **Key** 的 `hashCode` 
-  >
-  > 2. **高位运算 + 异或运算**, 得到新的 `hashCode`
-  >
-  > 3. 最后进行 `取模运算`, 得到最终的地址
-  >
-  >    > 1. 因为 **length** 总是 **2的n次方**, 所以对 **length-1** 的`按位与` 运算等价于 `取模运算`
-  >    >
-  >    >    ```java
-  >    >    // 当且仅当 b为2的n次方时成立
-  >    >    a % b == a & (b - 1);
-  >    >    ```
-  >    >
-  >    >    
-  >    >
-  >    > 2. 但是 `按位与` 运算比 `取模运算` 更快
-
-+ **源码**
-
-  ```java
-  static final int hash(Object key) {
-      int h;
-      
-      // 计算一次 hashCode, 然后右移16位( 取高位数值 )
-      // 将原来的 hashCode 与右移的 hashCode 做 异或运算
-      // 得到最终的 hashCode
-      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
-  }
-  
-  // 取模运算, 根据 hashCode 得到实际在 hashMap 中的位置
-  static int indexFor(int h, int length) {
-       return h & (length-1); 
-  }
-  ```
-
-
-
-#### 插入
-
-+ **示意图**
-
-  <img src="Java.assets/d669d29c.png" alt="d669d29c" style="zoom: 200%;" />
-
-+ **主要步骤**
-
-  > 1. 如果该位置 `没有元素` , 则直接插入
-  > 2. 如果有元素, 则逐个元素调用 `equals()` 方法
-  > 3. 返回 **true** 则 `直接覆盖` ; 返回 **false** 则在 `尾部插入`
-  > 4. 如果链表长度 大于**8**, 则 `树化为红黑树`, 然后插入
-  > 5. 如果插入后 **size > threshold** , 则扩容
-
-+ **源码**
-
-  ```java
-  public V put(K key, V value) {
-      
-      // 对 key 的 hashCode() 做 hash
-      // 然后使用 putVal
-      return putVal(hash(key), key, value, false, true);
-  }
-  
-  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                 boolean evict) {
-      
-      Node<K,V>[] tab; Node<K,V> p; int n, i;
-      
-      // 1.lazy-Load, 即 真正放入元素时 才初始化 hashMap
-      if ((tab = table) == null || (n = tab.length) == 0)
-          n = (tab = resize()).length;
-      
-      // 2.计算地址, 如果该位置为空
-      //   即没有相同的 Key, 则直接插入
-      if ((p = tab[i = (n - 1) & hash]) == null)
-          tab[i] = newNode(hash, key, value, null);
-      
-      else {
-          Node<K,V> e; K k;
-          
-          // 3.如果存在相同的 Key 和 Value ,则直接覆盖
-          if (p.hash == hash &&
-              ((k = p.key) == key || (key != null && key.equals(k))))
-              e = p;
-          
-          // 4. 否则判断是否为 红黑树
-          // 	  是则插入到树中
-          else if (p instanceof TreeNode)
-              e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-          
-          else {
-              
-              // 5. 否则遍历链表, 查看是否存在相同的 Value
-              for (int binCount = 0; ; ++binCount) {
-                  if ((e = p.next) == null) {
-                      p.next = newNode(hash, key, value, null);
-                      
-                      // 链表长度大于8, 转换为红黑树
-                      if (binCount >= TREEIFY_THRESHOLD - 1)
-                          treeifyBin(tab, hash);
-                      break;
-                  }
-                  
-                  // 存在相同的 Key 和 Value
-                  // 则直接覆盖
-                  if (e.hash == hash &&
-                      ((k = e.key) == key || 
-                       (key != null && key.equals(k))))
-                      break;
-                  
-                  // 不存在则在尾部插入
-                  p = e;
-              }
-          }
-          if (e != null) { // existing mapping for key
-              V oldValue = e.value;
-              if (!onlyIfAbsent || oldValue == null)
-                  e.value = value;
-              afterNodeAccess(e);
-              return oldValue;
-          }
-      }
-      ++modCount;
-      
-      // 超过最大容量 就扩容
-      if (++size > threshold)
-          resize();
-      afterNodeInsertion(evict);
-      return null;
-  }
-  
-  ```
-
-  
-
-
-
-#### 扩容
-
-+ **示意图( JDK1.7 )**
-
-  ![b2330062](Java.assets/b2330062.png)
-
-  > 1. 链表在扩容之后发生 `倒置` , 因为 **Java7** 采用的是 `头插法`, **Java8** 不会
-  > 2. 每一个元素都要进行 `重新哈希` , 比较耗时. **Java8** 采用比较巧妙的方法解决此问题
-
-+ **不需要重新哈希的方法**
-
-  <img src="Java.assets/4d8022db.png" alt="4d8022db" style="zoom: 200%;" />
-
-  > 1. **length** 总是 2的n次方, 即当发生扩容时, length 只会增加一位 1
-  >
-  >    ```java
-  >    1111(16) --> 0001 1111(32)
-  >    ```
-  >
-  > 2. 那么, 只需要根据元素 **原来的哈希值** 在 **length** 新增加的那一位 `是否为 1`, 即可判断该元素 `是否需要移动位置( 1则需要移动, 0 则不需要)`
-  >
-  > 3. 如果需要移动, 那么
-  >
-  >    ```java
-  >    // 因为 newIndex = hash & (length - 1)
-  >    // hash 是不会变的, 
-  >    // 那么 newIndex 只跟 length - 1有关
-  >    newIndex = oldIndex + oldCap;
-  >    ```
-  >
-  >    
-
-
-
-
-#### 红黑树
-
-##### 前情提要
-
-+ **二叉查找树**
-
-  <img src="Java.assets/Screenshot%20from%202021-05-23%2017-18-49.png" alt="Screenshot from 2021-05-23 17-18-49" style="zoom:50%;" />
-
-  > 1. 左结点 `一定小于` 右结点
-  >
-  > 2. 当存在 **1,2,3,4,5,6,7,8** 这样的数据, 二叉查找树 `退化为 链表` 
-  >
-  >    > 查找性能由 `O(log n)` 退化为 `O(n)`
-  >
-  > 3. 为了解决这个问题 , 提出了 `平衡二叉树`, `红黑树` 就是一种平衡二叉树
-  >
-  >    > **平衡二叉树** 保证了 `树的高度(查找速度) 为 O(log n)`
-
-
-
-##### 基本属性
-
-> 1. 结点只有 `红色或黑色`
->
-> 2. **根结点** 和 **叶子结点(nil)** 均为 `黑色结点`
->
->    > 1. **nil** 的意思是指, 每个结点都有两个 `值为 null` 的空结点, 直到有`真正的结点`插入
->    >
->    >    <img src="Java.assets/Screenshot%20from%202021-05-23%2018-15-05.png" alt="Screenshot from 2021-05-23 18-15-05" style="zoom:50%;" />
->
-> 3. `红色结点`的叶子结点`一定是`黑色结点
->
-> 4. 从**一个结点**出发, 到该结点的 `任何一个叶子结点`, 路径上包含的 `黑结点` 数量相同
->
->    > 1. 计数的时候不包含本身
->    > 2. 最短路径 : 路径上 `只有` 黑色结点
->    > 3. 最长路径 : **红色** 和 **黑色** 结点交替出现
->    > 4. 最长路径`不会长于两倍` 的最短路径
->
-> 5. 红黑树的操作 --> O(log n)
->
->    > 1. **查找**
->    >
->    >    > 与二叉查找树一致
->    >
->    > 2. **插入**
->    >
->    >    > 1. 因为插入的结点总是设为 `红色` , 故意破坏 **红黑树** 的约束, 从而通过 `旋转和变色` 来重新达到平衡
->    >    > 2. 插入包含 **寻找插入位置** 和 **自平衡过程**, 前者是查找操作, 后者最坏的情况是对 `整棵树` 进行 **自平衡** , 所以总的复杂度是 `O( log n)`
-
-##### 旋转
-
-> 1. 全部旋转的**时间复杂度**都是 `O(1)`
->
->    > 1. 因为红黑树的存储一般使用 `链表` 
-
-###### **左旋**
-
-+ **示意图**
-
-  <img src="Java.assets/Screenshot%20from%202021-05-23%2020-11-03.png" alt="Screenshot from 2021-05-23 20-11-03" style="zoom:50%;" />
-
-+ **步骤**
-
-  > 1. 将 **被旋转的结点** 的 **右结点** 的`左子树`作为 本结点的 `右结点` (左旋转 --> 右左子树 )
-  >
-  >    ![Untitled Diagram](Java.assets/Untitled%20Diagram.png)
-  >
-  > 2. 将 **被旋转的结点** 接到 **其右结点** 的 `左结点`
-  >
-  >    ![Untitled Diagram (1)](Java.assets/Untitled%20Diagram%20(1).png)
-  >
-  > 3. 即 **被左旋的结点** 作为 **其右结点 **的`左子树`
-
-###### **右旋**
-
-+ **示意图**
-
-  <img src="Java.assets/Screenshot%20from%202021-05-23%2020-11-14.png" alt="Screenshot from 2021-05-23 20-11-14" style="zoom: 50%;" />
-
-+ **步骤**
-
-  > 1. 将 **被旋转的结点** 的 **左结点** 的`右子树`作为 本结点的 `左结点` (右旋转 --> 左右子树 )
-  >
-  >    ![Untitled Diagram (2)](Java.assets/Untitled%20Diagram%20(2).png)
-  >
-  > 2. 将 **被旋转的结点** 接到 **其左结点** 的 `右结点`
-  >
-  >    ![Untitled Diagram (3)](Java.assets/Untitled%20Diagram%20(3)-1621773074103.png)
-  >
-  > 3. 即 **被右旋的结点** 作 为 **其左结点 **的`右子树`
-
-##### 插入策略
-
-+ **Z 关系**
-
-<img src="Java.assets/Screenshot%20from%202021-05-23%2020-37-15.png" alt="Screenshot from 2021-05-23 20-37-15" style="zoom:50%;" />
-
-> 1. Z 是要插入的结点
-> 2. 插入的结点总是 `红色` 的
-
-+ **Z 是根结点**
-
-> 1. 将 Z 涂成 `黑色`
->
->    ![Untitled Diagram (5)](Java.assets/Untitled%20Diagram%20(5).png)
-
-+ **Z 的 uncle 是红色结点**
-
-> 1. 将 Z 的 **Uncle 和 Parent** 涂成`黑色`, 而 **Grandparent** 涂成`红色`
->
->    ![Untitled Diagram (4)](Java.assets/Untitled%20Diagram%20(4).png)
-
-
-
-+ **Z 的 uncle 是黑色并且呈现 三角关系**
-
-> 1. 其中 **Z, Z.Parent** 都是 `红色`
->
->    <img src="Java.assets/Screenshot%20from%202021-05-23%2020-49-54.png" alt="Screenshot from 2021-05-23 20-49-54" style="zoom:80%;" />
->
->    > 1. 即 **Z** 是 **Z.Parent** 的 `左/右` 结点, 而 **Z.Parent** 是 **Z.GrandParent** 的`右/左` 结点
->
-> 2. 此时需要对 **Z.Parent** 进行与 `Z 的方向相反`的旋转
->
->    > 左图进行右旋, 右图进行左旋
-
-
-
-+ **Z 的 uncle 是黑色并且呈现 直线关系**
-
-> 1. 其中 **Z, Z.Parent** 都是 `红色`
->
->    <img src="Java.assets/Screenshot%20from%202021-05-24%2021-03-32.png" alt="Screenshot from 2021-05-24 21-03-32" style="zoom:80%;" />
->
->    > 即 **Z** 是 **Z.Parent** 的 `左/右` 结点, 而 **Z.Parent** 是 **Z.GrandParent** 的`左/右` 结点
->
-> 2. 此时需要对 **Z.GrandParent** 进行与 `Z 的方向相反`的旋转
->
->    > 左图进行 左旋, 右图进行 右旋
->
-> 3. 并且需要对 **Z.GrandParent** 和 **Z.Parent** 进行涂色
-
-##### 删除策略
-
-#### 线程安全问题
-
-##### **JDK 1.7**
-
-+ **源码**
-
-  ```java
-  void transfer(Entry[] newTable, boolean rehash){
-      int newCapacity = newTable.length;
-      for (Entry<K, V> e : table){
-          while(e != null){
-              
-              // 储存当前结点的下一个结点
-              // 因为之后会 断开 当前结点的 指向
-              Entry<K, V> next = e.next;
-              
-              if(rehash){
-                  e.hash = null == e.key ? 0 : hash(e.key);
-              }
-              
-              // 计算新的储存位置
-              int i = indexFor(e.hash, newCapacity);
-              
-              // 若该位置为空, 则当前元素指向 null : null 结点
-              // 否则指向该位置存储的元素
-              // 相当于插入已有结点的前面, 即"头插法"
-              e.next = newTable[i];
-              newTable[i] = e;
-              
-              // 注意!!!
-              // 链表中的整个结点是不可能被覆盖的, 只能覆盖结点的值
-              // 当没有任何引用指向结点, 和结点不指向任何结点时
-              // 该结点会被垃圾回收, 称为 "删除结点"
-              
-              // 相当于普通循环中的 i++
-              e = next;
-          }
-      }
-  }
-  ```
-
-  
-
-+ **死循环**
-
-  > 1. 此时 **线程 A** 和 **线程 B** `同时触发`扩容机制
-  >
-  >    <img src="Java.assets/1553942282.jpeg" alt="1553942282" style="zoom:150%;" />
-  >
-  > 2. **线程 A** 将 **3** 解除指向, 此时操作系统 `进行了时间片轮询`
-  >
-  >    <img src="Java.assets/1553943048.jpeg" alt="1553943048" style="zoom:150%;" />
-  >
-  > 3. **线程 B** 完成了整个扩容, 此时操作系统 `进行了时间片轮询`. 
-  >
-  >    注意, 对于 **线程 A** 来说, `e = 3,  e.next = null, next = 7 , next.next = 3`
-  >
-  >    ![3](Java.assets/3.png)
-  >
-  > 4. **线程 A** 继续进行扩容, 将 **3** 又插入了链表的头部.
-  >
-  >    ![4](Java.assets/4.png)
-  >
-  > 5. 进入下一轮循环, 更新 `e = 7, next = 3` , 又将 **7** 插入链表头部
-  >
-  >    ![5 (1)](Java.assets/5%20(1).png)
-  >
-  > 6. 进入下一轮循环, 更新 `e = 3, next = null`, 又将 **3** 插入链表头部, 形成的 **3** 和 **7** 互指的场面, 即链表有环.
-  >
-  >    ![6 (1)](Java.assets/6%20(1).png)
-  >
-  > 7. 下一次进行查询时, 将会出现 `死循环`
-
-##### JDK 1.8
-
-+ **源码**
-
-  ```java
-  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                 boolean evict) {
-      
-  	//......
-      
-      // 计算地址, 如果该位置为空
-      // 即没有相同的 Key, 则直接插入
-      if ((p = tab[i = (n - 1) & hash]) == null)
-          
-          // 如果该位置存在结点
-          // 会使原来的结点即不指向任何结点, 也没有结点指向它
-          // 即该节点被删除了
-          tab[i] = newNode(hash, key, value, null);
-      
-      //.....
-  }
-  
-  ```
-
-  
-
-+ **数据丢失问题**
-
-  > 1. 当 **线程 A**  对 **位置 1 ( 原本没有数据 )** 进行数据插入时, 操作系统 `进行时间片轮询`
-  > 2. **线程 B** 对 **位置 1** 完成了数据插入, 操作系统 `进行时间片轮询`
-  > 3. 此时 **线程 A** 对 **位置 1** 完成数据插入, 覆盖了 **线程 2 的数据**
+>    > 1. 因为底层使用 `红黑树` 实现
 
 
 
@@ -2191,6 +1838,8 @@ while(iterator.hasNext()){
   > 1. 没有 Segments , 直接是 `桶 + 链表` 
   > 2. 比 **1.7** 具有`更细的粒度( 桶 )`
 
+
+
 ### PUT() 方法
 
 + **1.7**
@@ -2199,7 +1848,7 @@ while(iterator.hasNext()){
   >
   > 2. 再 **hash 一次**, `定位 HashEntry`
   >
-  > 3. 然后对 Segments 加锁做进一步处理
+  > 3. 然后对 **Segments** 加锁做进一步处理
   >
   >    > 1. 没有拿到锁的线程, `只执行步骤 1,2,` 和在 **HashEntry** 上找是否有相同的 **Key**
   >    > 2. 并且不断自旋, 64 次之后挂起
@@ -2219,7 +1868,7 @@ while(iterator.hasNext()){
 
   > 1. 因为结点的 **value** 使用 **volatile** 修饰, 保证了 `可见性 和 happen-before( 写操作 先发生于 读操作 )`, 所以不需要加锁
   >
-  >    > 1. 另外, **ConcurrenthashMap** 本身也用 **volatile** 修饰, 但是是用来保证该数组在**扩容的时候**对其他线程是 `可见的` 
+  >    > 1. 另外, **ConcurrenthashMap** 本身也用 **volatile** 修饰, 但是是用来保证该数组在 **扩容的时候** 对其他线程是 `可见的` 
 
 
 
@@ -2227,121 +1876,20 @@ while(iterator.hasNext()){
 
 + **1.7**
 
-  > 1. 先使用**不加锁**的方式`计算两次 size`, 如果**结果一致**, 则利用这个 **size** 判断是否需要扩容
+  > 1. 先使用**不加锁**的方式`计算两次 size`, 如果 **结果一致**, 则利用这个 **size** 判断是否需要扩容
   > 2. 如果`结果不一致`, 则对全部 **Segments** 加锁, 再计算一次
   > 3. 如果需要扩容, 则和 **HashMap** 一致, 但使用 `单线程` 进行扩容, `避免形成环`
 
 + **1.8**
 
   > 1. 迁移时 **头插改尾插**, 避免形成 `环`
-  > 2. **从尾往头部**迁移, 迁移前在 **桶的头部** 放置一个 `hashCode == -1` 的结点( ForwardNode )
+  > 2. **从尾往头部**迁移, 迁移前在 **桶的头部** 放置一个 `hashCode == -1` 的结点( **ForwardNode** )
   > 3. 如果对 **旧的哈希表** 使用 `GET() 方法` , 不会影响访问
   > 4. 如果对 **旧的哈希表** 使用 `PUT() 方法` , 在遇到 **ForwardNode 结点后**, 会帮助进行扩容. 即`多线程扩容`
 
 
 
 ## 多线程
-
-### Java 的各种锁
-
-#### 前情提要
-
-> 1. 线程 **被阻塞** 的时候`不会消耗 CPU 性能`, 但是 **执行阻塞和唤醒** 的时候会`很消耗 CPU 性能`
->
->    > 1. 因为阻塞和唤醒涉及 **线程等待队列** 的 `入队和出队, 上下文切换` 等操作, **消耗非常昂贵**
->
-> 2. 如果线程占用锁的`时间比较少`, 使用 `线程自旋` 等技术, 因为**不会涉及阻塞和唤醒 **动作的发生, 比 **方法1** 性能更好
->
->    > 1. **自旋**是指, 线程执行死循环一段时间, 直到操作执行成功. 消耗一点 CPU 性能, 避免了 **阻塞和唤醒**
->    > 2. 常见实现是 `死循环 + CAS 操作`
->
-> 3. 所以在涉及线程并发的时候, **如果线程数较少, 或者 读多写少 情况**, 应该尽量避免 `线程阻塞和唤醒` , 多采用 `自旋` 等方式. 相反则应该使用 `锁`
-
-
-
-#### 乐观锁 和 悲观锁
-
-> 1. 两者都是指 **多线程** 中解决`资源竞争`的思想, **不是具体代码**
->
-> 2. **乐观锁**是指, 认为 **没有其他线程, 或者只有少量的线程** 会竞争资源, 所以只在**执行具体操作**的时候才判断有无 `竞争资源问题` 
->
->    > 1. 常见实现有 `CAS, 无锁/自旋锁`
->    > 2. 乐观锁 has ( 无锁, 自旋锁, CAS )
->
-> 3. **悲观锁**是指, **肯定会出现线程竞争问题**, 所以在操作资源之前, `预先上锁`
->
->    > 1. 常见实现有 `轻/重量级锁`
-
-
-
-#### 自旋锁 和 适应性自旋锁
-
-> 1. **自旋锁** 是指, 多个线程并发时, **不对资源上锁**, 而是`让线程短时间自旋`, 直到获得锁. 即同时`只有一个线程`可以做出修改. 
->
->    > 1. 一般使用 `循环 + CAS 操作` 实现
->    > 2. 自旋锁 属于 乐观锁
->
-> 2. **适应性自旋锁** 是指, 系统会判断自旋 **是否会在短时间内获得 锁**, 不行则使用 `阻塞和唤醒` 等操作
-
-
-
-#### 无锁 , 偏向锁, 轻量级锁, 重量级锁
-
-> 1. 四个锁都是针对 `Synchronized` 关键词的. 锁 `可以升级` 并且升级过程`只能从左往右`.
->
-> 2. 无锁 == 自旋锁
->
-> 3. **偏向锁**是指, 默认自始至终`只有一个线程`在使用共享资源, 即不会去锁任何的资源, 也就没有 **阻塞和唤醒** 等动作的发生. 但是, 一旦有**第二个线程竞争**, 就立即膨胀为 `轻量级锁`
->
->    > 1. 设计的初衷就是不要`一上来就去锁资源`, 而是从**最乐观的角度**出发, 直到出现线程竞争才升级锁
->
-> 4. **轻量级锁 **是指, **新来的线程** 通过 `自旋` 来获取锁. 即一个线程持有 **轻量级锁** , 另外一个线程 `自旋等待`. 如果有 **第三个线程竞争**, 则升级为 `重量级锁`
->
-> 5. **重量级锁** 是指, 对于等待的线程, 使用 `阻塞和唤醒` 等动作管理
-
-
-
-#### 公平锁 和 非公平锁
-
-> 1. **公平锁** 是指, 先到 **等待队列** 排队的线程先拿到锁. 即严格遵守 `队列先进先出`
->
-> 2. **非公平锁** 是指, 等待线程 `同时抢夺锁`, 先等待的线程**未必**先拿到锁
->
->    > 1. 会导致 `饥饿问题`
-
-
-
-#### 可重入锁 VS 非可重入锁
-
-##### 前情提要 -- Synchronized 究竟锁什么
-
-> 1. **锁普通方法** : 此时锁的是 `实例对象`
-> 2. **锁静态方法** : 此时锁的是 `类`
-
-##### 讲解
-
-> 1. **可重入锁** 是指, 获得锁的线程可以执行**所有**的 `内层方法`
->
->    > 1. 例如, 获得实例对象锁, 可以执行**该对象里** `所有带锁的普通方法`. 获得 **类锁**, 可以执行 **该类**`所有带锁的静态方法`
->    > 2. 可以有效避免 `死锁`. 即当出现 **带锁方法** `互相调用的时候 `, 不会因为两个线程 **各持一锁** 而形成 `死锁`
->
-> 2. 那么 **非重入锁** 就是反过来
-
-
-
-#### 独享锁 和 公平锁
-
-> 1. 两者均是指 `编程思想`
->
-> 2. **独享锁** 是指, 一个锁一次 **只能** 被`一个线程`所持有. 该线程可以实现 `读写`
->
->    > 1. 实现 : **Synchronized** 和 **Lock**
->
-> 3. **共享锁** 是指, 一个锁可以被`多个线程`持有. 但是只要有一个线程加上 **共享锁** 后, 其他线程也只能加 **共享锁**. 这些线程只能 `读`
->
->    > 1. 其中, **读读共享**, `读写, 写读, 写写 互斥`
-
-
 
 ### WAIT() 和 SLEEP() 的区别
 
@@ -2373,32 +1921,16 @@ while(iterator.hasNext()){
 
 ### Thread 和 Runnable 的区别
 
+> 1. 两者没有可比性
+> 2. **Thread** 是一个 **Java** 自带的类, 实现了 **Runnable** 接口, 提供了更多的 `线程操作`. 使用方法是 `继承`
+> 3. **Runnable** 是一个接口, 只有实现这个接口的类才可以使用 `多线程技术` , 使用的方法是 `实现接口` 
+> 4. 所以 **Thread** 比较死板, 而 **Runnable** 比较灵活, 可以实现多继承
 
 
 
+## 网络
 
-
-
-## TCP 三次握手 和 四次挥手
-
-### 三次握手
-
-![sanci](Java.assets/sanci.png)
-
-#### 步骤
-
-> 1. **第一次握手**是指, 客户端发送 **SYN=1， seq=x( 随机生成 )**. 客户端进入 `SYN-SENT 状态`
->
-> 2. **第二次握手**是指, 服务端接受后, 发送 **SYN=1, ACK=1, seq=y( 随机生成 ), ack=x+1**, 服务端进入 `SYN-RCVD 状态`
->
->    > 1. 发出的 `ack = 接收的 seq +1`
->    > 2. 即 希望对方从 `seq + 1` 开始发送数据
->
-> 3. **第三次握手**是指, 客户端接受后, 发送 **ACK=1, seq=x+1, ack=y+1**, 进入 `EXTABLISHED 状态`
->
->    > 1. 发出的 `seq = 接收的 ack`
->
-> 4. 服务端接受后, 也进入 `EXTABLISHED 状态`
+### TCP 
 
 #### 为什么是三次握手而不是两次握手
 
@@ -2425,6 +1957,8 @@ while(iterator.hasNext()){
 
 + **确认自己的 seq 和对方的 seq**
 
+
+
 #### 两军问题
 
 + **场景**
@@ -2442,27 +1976,20 @@ while(iterator.hasNext()){
 
   > 1. 根据 **两军问题** 可知,  三次握手是能保证 `双方可能进行正常通信的最少次数`
 
-### 四次挥手
 
-<img src="Java.assets/sici-1622277304896.png" alt="sici"  />
-
-#### 步骤
-
-> 1. **第一次挥手**, 客户端 发送 **FIN=1, seq=u( 随机生成 )**, 进入 `FIN-WAIT-1 状态`
-> 2. **第二次挥手**, 服务端 接收后, 发送 **ACK=1, seq=v( 随机生成 ), ack=u+1**, 检查`是否还有数据要发送`, 然后进入 `CLOSE-WAIT 状态`
-> 3. **客户端** 接收后进入 `FIN-WAIT-2 状态`
-> 4. **第三次挥手**, 服务端 发送数据后, 发送 **FIN=1 , ACK=1, seq=w( 随机生成 ), ack=u+1**, 进入 `LAST-ACK 状态`
-> 5. 第四次挥手, 客户端 接收后, 发送 **ACK=1, seq=u+1, ack=w+1**, 进入 `TIME-WAIT 倒计时状态`, 倒计时结束后`关闭连接`
-> 6. **服务端 **收到后`关闭连接`
 
 #### TIME-WAIT 的作用
 
 > 1. 如果 **第三次挥手**, 客户端没有接收到, 因为有 `TIME-WAIT` , 所以客户端可以收到服务端 `重传的报文` , 双方得以顺利关闭连接.
 > 2. 经过 `TIME-WAIT` 后, 本次连接产生的全部报文都会在 **网络中消失**, 不会干扰到下一次的连接. 
 
+#### 滑动窗口
 
 
-## HTTP 和 HTTPS 的区别
+
+### HTTP
+
+#### HTTP 和 HTTPS 的区别
 
 
 
