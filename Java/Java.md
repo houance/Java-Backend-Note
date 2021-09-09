@@ -669,8 +669,14 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 #### 综述
 
 > 1. **lambda : 函数式编程**, 即把一个函数当成是参数传入
+>
 > 2. 因为 **lambda** 可以`自动推断参数的类型`, 所以写参数的时候可以`不用声明类型`
+>
 > 3. **例子** : (para1,para2) -> { 函数具体实现 }
+>
+> 4. 例子2 : 如果函数具体实现只有一句话, 即形如 {return value;}, 可以写成
+>
+>    ​				(para1, para2) -> 一句话实现
 
 
 
@@ -736,7 +742,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 
 
-### 遍历中删除元素的技巧
+## 遍历中删除元素的技巧
 
 ```java
 List<Integer> list = new ArrayList<>();
@@ -773,7 +779,7 @@ while(iterator.hasNext()){
 
 
 
-### Map
+## Map
 
 + **Map 转 List / Set**
 
@@ -786,7 +792,136 @@ while(iterator.hasNext()){
   
   ```
 
-  
+
+
+
+## Comparator 重写
+
+```JAVA
+    /**
+     *
+     * @param o1 比较的元素
+     * @param o2 比较的元素
+     * @return >0 表示 o1 > o2, 即交换位置
+     *         0 表示等于, 即不用交换位置
+     *        <0 表示小于, 即不用交换位置
+     */
+public int compare(Object o1, Object o2);
+```
+
+
+
+
+
+## Stream API
+
+### 什么是 Stream
+
+*将集合, 数组, IO 转换为流(stream) 统一处理, 更加方便, 同时引入了并行流工具, 简化了多线程程序的编写*
+
+
+
+### Boxed
+
+*原始数据类型在流中需要 Boxed(装包) 才可以使用*
+
+```java
+// 两种方式都可以, 下面的方式更快
+
+int[] nums = {1,2,3,4,5};
+
+Arrays.stream(nums)
+    .boxed();
+
+IntStream.of(nums)
+    .boxed();
+```
+
+
+
+### Intermediate Op ( 中间操作 )
+
+
+
+#### Map( 原集合 1:1 的变换 )
+
+```java
+List<Integer> integers = Arrays.asList(-1, -2, -3, -4, -5);
+
+List<Integer> absIntegers = integers.stream()
+    								.map(Math::abs) // 传入 Lambda 表达式或引用
+   									.collect(Collectors.toList());
+```
+
+
+
+
+
+#### Filter( 原集合 1:更少 的变换 )
+
+```java
+List<Integer> integers = Arrays.asList(-1, -2, -3, -4, -5);
+
+List<Integer> greaterN4 = integers.stream()
+    							  .filter((o1) -> o1 > -4) // 传入表达式, 返回值是 boolean
+    							  .collect(Collectors.toList());
+```
+
+
+
+#### Sorted( 排序 )
+
+*传入一个  Lamba 表达式, 进行排序*
+
+```java
+List<Integer> integers = Arrays.asList(-1, -2, -3, -4, -5);
+
+List<Integer> absSorted = integers.stream()
+    							  // 传入 Lambda Comparator 表达式
+    							  .sorted((o1, o2) -> Math.abs(o2) - Math.abs(o1))
+    							  .collect(Collectors.toList());
+```
+
+
+
+### Terminal Operations
+
+#### Collect( 将整个流转换为集合或数组 )
+
+```java
+int[] nums = {-1,-2,-3,-4};
+List<Integer> listNums = Arrays.stream(nums)
+    .boxed()
+    .collect(Collectors.toList());
+```
+
+
+
+
+
+#### ForEach( 遍历每一个元素, 执行的顺序不确定 )
+
+```java
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+numbers.stream()
+    .forEach((o1)-> System.out.println(o1-1));
+```
+
+
+
+
+
+#### Reduce( 聚合操作, 类似 count, sum, max, min )
+
+```java
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+Integer subtraction = numbers.stream()
+    // 第一个参数是初始化值, 如果 stream 为空则返回该值
+    // 第二个参数是 Lambda 表达式或引用,
+    // o1 表示初始化的值, o2 表示第一个元素, 
+    // 计算后的结果又赋值给 o1, o2 表示第二个元素, 以此类推
+    .reduce(0, (o1, o2)-> o2-o1);
+```
 
 
 
