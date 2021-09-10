@@ -1,6 +1,6 @@
 # MySQL表锁可能存在的问题
 
-MySQL里面表级别的锁有两种：一种是表锁，一种是元数据锁（meta data lock，MDL)。
+MySQL里面表级别的锁有两种：一种是表锁，一种是元数据锁（meta data lock，MDL)
 
 ![](https://raw.githubusercontent.com/Cerbur/pic/main/20210715143052.png)
 
