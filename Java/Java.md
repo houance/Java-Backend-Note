@@ -687,77 +687,11 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 
 
-#### forEach 遍历方法
-
-+ **综述**
-
-  > 1. **forEach** 传入`一个参数(集合里面的值)`, **没有返回值**
-  > 2. 对于具体实现 `只有一个方法的情况`, 可以直接`传一个静态方法`
-  > 3. 在 **forEach** 形式的循环中 `无法更新` 集合的数据
-
-+ **例子**
-
-  ```java
-  List<Integer> list = new ArrayList<>();
-  Set<Integer> set = new HashSet<>();
-  Map<Integer, Integer> map = new HashMap<>();
-  
-  // list 和 set 的例子
-  list/set.forEach(value->{
-      /* 
-      	Code Here
-      */
-  });
-  list/set.forEach(System.out::println);
-  
-  // map 的例子
-  map.forEach((key, value)->{
-      /* 
-      	Code Here
-      */
-  });
-  ```
-
-  
-
-#### List
-
-+ **sort 排序方法重写**
-
-  ```java
-  List<Integer> list = new ArrayList<>();
-  /*
-  	list.add ...... 
-  */
-  
-  // sort 方法默认输入两个参数(集合里面相邻的两个值), 返回一个值
-  // 小于则返回 负数, 等于则返回 0, 大于则返回 正数
-  
-  // sort 默认的情况是升序排序
-  // 这里将 升序改为降序
-  // 只需要将 o1,o2 的参数比较的顺序序调转即可
-  
-  list.sort((o1, o2) -> return Integer.compare(o2, o1));
-  ```
 
 
-
-## 遍历中删除元素的技巧
+### 遍历中删除元素的技巧
 
 ```java
-List<Integer> list = new ArrayList<>();
-/*
-	list.add ...... 
-*/
-Set<Integer> set = new HashSet<>();
-/* 
-	set.add ......
-*/
-Map<Integer, Integer> map = new HashMap<>();
-/* 
-	map.put ......
-*/
-
 // Map 生成 EntrySet, 即 一个 Set 存储的元素是 Entry
 // 然后再对这个 Set 生成一个 迭代器( Iterator )
 Iterator<Map.Entry<String, Integer>> iterator = maps.entrySet().iterator();
@@ -779,23 +713,10 @@ while(iterator.hasNext()){
 
 
 
-## Map
-
-+ **Map 转 List / Set**
-
-  ```java
-  Map<String, Integer> maps = new HashMap<>();
-  
-  // Map 生成 entrySet, 即一个 Set 集合, 里面存放的元素是 Entry 类型
-  // 然后复制到 List 或者 Set 中
-  List/Set<Map.Entry<String, Integer>> entryArrayList = new ArrayList/HashSet<>(maps.entrySet());
-  
-  ```
 
 
 
-
-## Comparator 重写
+### Comparator 重写
 
 ```JAVA
     /**
@@ -828,7 +749,7 @@ public int compare(Object o1, Object o2);
 ```java
 // 两种方式都可以, 下面的方式更快
 
-int[] nums = {1,2,3,4,5};
+int/long/double[] nums = {1,2,3,4,5};
 
 Arrays.stream(nums)
     .boxed();
@@ -839,9 +760,22 @@ IntStream.of(nums)
 
 
 
+### Map Stream
+
+```java
+// Map 的数据类型没有 流 的概念
+// 需要转换为 entrySet 后, 才能使用流
+
+hashMap.entrySet().stream();
+```
+
+
+
+
+
+
+
 ### Intermediate Op ( 中间操作 )
-
-
 
 #### Map( 原集合 1:1 的变换 )
 
@@ -852,8 +786,6 @@ List<Integer> absIntegers = integers.stream()
     								.map(Math::abs) // 传入 Lambda 表达式或引用
    									.collect(Collectors.toList());
 ```
-
-
 
 
 
@@ -886,13 +818,25 @@ List<Integer> absSorted = integers.stream()
 
 ### Terminal Operations
 
-#### Collect( 将整个流转换为集合或数组 )
+#### Collect( 将整个流转换为集合 )
 
 ```java
 int[] nums = {-1,-2,-3,-4};
 List<Integer> listNums = Arrays.stream(nums)
     .boxed()
     .collect(Collectors.toList());
+```
+
+
+
+#### ToArray( 将整个流转换为数组 )
+
+```java
+List<Integer> integers1 = Arrays.asList(1, 2, 3, 4, 5, 6);
+
+String[] strings1 = integers1.stream()
+    .map(o1 -> Integer.toString(o1))
+    .toArray(String[]::new);
 ```
 
 
@@ -906,8 +850,6 @@ List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
 numbers.stream()
     .forEach((o1)-> System.out.println(o1-1));
 ```
-
-
 
 
 
