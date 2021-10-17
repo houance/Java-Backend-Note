@@ -78,11 +78,24 @@
 
     > 1. `Partion(分区)` 可以被 `不同的 Consumer Group(消费者集群)` 里面的 `Consumer(消费者)` 同时消费
 
-+ **ZooKeeper ( 未来的版本可能会移除 )**
 
-  + **综述**
 
-    > 1. `Zookeeper` 用于 `维护信息` , `统一命名` , `分布式同步` 和提供 `组服务(新版本中由 Kafka 自己实现了)`
 
-  + 
+## Replications 管理
+
+> 前情提要 : ***Kafka*** 所有的容灾都做在 ***分区( Partition )*** 这个层级上
+
+
+
+### 名词介绍
+
+*AR ( All Replications )* : 所有分区的 Replication 
+
+*ISR ( In Sync Replications )* : 保持同步的 Replication
+
+*OSR ( Out Sync Replications )* : 滞后/脱离同步的 Replication
+
+***AR = ISR + OSR***
+
+
 

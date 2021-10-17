@@ -8,33 +8,33 @@
 
 #### 例子
 
-> ```java
-> // class Apple extend Fruit
-> Fruit fruit = new Apple();
-> ```
->
-> 1. 此时 `fruit` 引用了 `Fruit` 的子类, 称为向上转型
-> 2. `fruit` 可以调用 `Apple 类` 中属于 `Fruit 类` 的属性和方法`( 如果方法被重写, 那么调用的是重写后的方法 )`.
-> 3. `fruit` 无法调用 `Apple 类` 中不属于 `Fruit 类` 的属性和方法
+```java
+// class Apple extend Fruit
+Fruit fruit = new Apple();
+```
+
+1. 此时 `fruit` 引用了 `Fruit` 的子类, 称为向上转型
+2. `fruit` 可以调用 `Apple 类` 中属于 `Fruit 类` 的属性和方法`( 如果方法被重写, 那么调用的是重写后的方法 )`.
+3. `fruit` 无法调用 `Apple 类` 中不属于 `Fruit 类` 的属性和方法
 
 #### 应用
 
-> ```java
-> //class Apple extend Fruit
-> class Test{
->  public void main(){
->      run(new Fruit());
->      run(new Apple());
->  }
-> 
->  private void run(Fruit fruit){
->      fruit.anymethod();
->  }
-> 
-> }
-> ```
->
-> 1. 上述例子通过 `向上转型` , 省去了 `run` 方法的重载.
+```java
+//class Apple extend Fruit
+class Test{
+public void main(){
+  run(new Fruit());
+  run(new Apple());
+}
+
+private void run(Fruit fruit){
+  fruit.anymethod();
+}
+
+}
+```
+
+1. 上述例子通过 `向上转型` , 省去了 `run` 方法的重载.
 
 
 
@@ -42,14 +42,14 @@
 
 #### 例子
 
-> ```java
-> // class Apple,Orange extend Fruit
-> Fruit fruit = new Apple(); //向上转型
-> Apple apple = (Apple) fruit; // (Apple) fruit 称为向下转型, 不会报错
-> 
-> Fruit fruit = new Apple();// 向上转型
-> Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
-> ```
+```java
+// class Apple,Orange extend Fruit
+Fruit fruit = new Apple(); //向上转型
+Apple apple = (Apple) fruit; // (Apple) fruit 称为向下转型, 不会报错
+
+Fruit fruit = new Apple();// 向上转型
+Orange orange = (Apple) fruit; // 向下转型失败, 编译成功, 运行失败
+```
 
 
 
@@ -57,41 +57,41 @@
 
 ### 综述
 
-> 1. `泛型` 是指 类, 接口或者方法使用 `类型(Types)` 进行初始化, 通常用于编写 `集合/容器` 类.
+1. **泛型** 是指 类, 接口或者方法使用 **类型(Types) 进行初始化**, 通常用于编写 ***集合/容器*** 类.
 
-> 1. `Java` 着重于`类型安全(Type Safe)`, 大部分 `类型错误` 会在`编译期`被发现, 但是如果使用`强制类型转换`, 这种错误很难在编译期发现.  
-> 2. `Java 5` 之前, 一般使用 `Object` 实现 `泛型` 功能, 但是需要使用 `强制类型转换`, 带来很大的 `安全隐患`.
-> 3. `Java 5` 之后, 引入 `<>` 的方法, 在编译期就可以发现`类型错误`.
+> 1. `Java` 着重于类型安全(Type Safe), 大部分 类型错误 会在编译期被发现, 但是如果使用强制类型转换, 这种错误很难在编译期发现.  
+> 2. `Java 5` 之前, 一般使用 `Object` 实现 泛型 功能, 但是需要使用 强制类型转换, 带来很大的 安全隐患.
+> 3. `Java 5` 之后, 引入 `<>` 的方法, 在编译期就可以发现类型错误.
 
 
 
 ### 例子
 
-> 1. **泛型类**
->
->    > ```java
->    > public class Test<T> {
->    >  private T val;
->    > 
->    >  public T getVal() {
->    >      return val;
->    >  }
->    >  public T setVal(T val) {
->    >      this.val = val;
->    >  }
->    > }
->    > ```
->    >
->    > 
->
-> 2. **泛型方法**
->
->    > ```java
->    > // <Class> 是使用泛型的类(多是集合)
->    > public <T> <Class><T> print(Test<T> a, Test<T> b){}
->    > ```
->    >
->    > 
+ 1. **泛型类**
+
+    ```java
+    public class Test<T> {
+    private T val;
+    
+    public T getVal() {
+      return val;
+    }
+      public T setVal(T val) {
+      this.val = val;
+    }
+    }
+    ```
+   
+    
+
+ 2. **泛型方法**
+
+    ```java
+    // <Class> 是使用泛型的类(多是集合)
+    public <T> <Class><T> print(Test<T> a, Test<T> b){}
+    ```
+    
+    
 
 
 
@@ -99,34 +99,24 @@
 
 #### 综述
 
-> 1. 通常用于 `泛型方法` 中传入参数
+1. 通常用于 ***泛型方法*** 中传入参数
 
 
 
 #### 用法
 
-> 1. 上界通配符
->
->    <img src="Java.assets/upper%20bound.png" alt="upper bound" style="zoom:150%;" />
->
-> 2. 下界通配符
->
->    <img src="Java.assets/lower%20bound.png" alt="lower bound" style="zoom:150%;" />
+
 
 
 
 #### 例子
 
-> ```java
-> // <Class> 是使用泛型的类(多是集合)
-> public <Class><? extends Number> print
->  (<Class><? extends Number> a, 
->   <Class><? extends Number> b)
-> ```
-
-
-
-
+```java
+// <Class> 是使用泛型的类(多是集合)
+public <Class><? extends Number> print
+(<Class><? extends Number> a, 
+<Class><? extends Number> b)
+```
 
 
 
@@ -134,83 +124,72 @@
 
 ### 前情提要
 
-> 1. **equals 方法**
->
->    > 1. 没有覆写, 则比较两个对象的 `地址` 是否相等
->    >
->    > 2. 覆写后, 用于比较两个对象的 `内容` 是否相等
->    >
->    >    ```java
->    >    int a=1;
->    >    int b=1;
->    >    
->    >    // 没有覆写
->    >    a.equals(b); // 结果为 false
->    >    
->    >    // 覆写为比较两个对象的 值
->    >    a.equals(b); // 结果为 true
->    >    ```
->    >
->    > 
->
-> 2. **hashCode 方法**
->
->    > 1. 输入对象的 **地址**, 输出 `一个整数`
->    >
->    >    > 1. 一般的来说, 就是把 **任意长度的输入, 变换为固定长度的输出**
->    >
->    > 2. 不同的输入可能会 `导致相同的输出`
->
-> 3. 两者在 **HashMap** 中的约束
->
->    > 1. **equals()** 相等, 则 **hashCode()** 也要相等
->    >
->    > 2. 重写 **hashCode()** , 也要重写 **equals()**
->    >
->    >    > 因为 **equals()** 默认情况和 **hashCode()** 一样
+1. **equals 方法**
+
+   1. `没有覆写`, 则比较两个对象的 ***地址***  是否相等
+
+   2. `覆写后`, 用于比较两个对象的 ***内容***  是否相等
+
+      ```java
+      int a=1;
+      int b=1;
+      
+      // 没有覆写
+      a.equals(b); // 结果为 false
+      
+      // 覆写为比较两个对象的 值
+      a.equals(b); // 结果为 true
+      ```
+
+   
+
+2. **hashCode 方法**
+
+   1. 输入对象的 **地址**, 输出 `一个整数`
+
+      > 1. 一般的来说, 就是把 **任意长度的输入, 变换为固定长度的输出**
+
+   2. 不同的输入可能会 `导致相同的输出`
+
+
+
+3. 两者在 **HashMap** 中的约束
+   1. **equals()** 相等, 则 **hashCode()** 也要相等
+
+   2. 重写 **hashCode()** , 也要重写 **equals()**
+
+      > 因为 **equals()** 默认情况和 **hashCode()** 一样
 
 ### 阈值( threshold )和负载因子( loadFactor ) 和 初始化
 
-#### 源码
-
-```java
-// HashMap 中 初始化操作的字段
-int threshold;
-final float loadFactor;
-int modCount;
-int size;
-```
-
-
-
 #### 讲解
 
-> 1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括`拉链存储`的键值对 )
->
->    ```java
->    threshold = length * loadFactor;
->    ```
->
-> 2. **loadFactor** 是对`空间和时间`的一个取舍
->
->    > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
->    > 2. **loadFactor** 越大, 则与上述相反
->
-> 3. **length** 是 hashMap 实际长度( 不包括`拉链存储` 的键值对 )
->
->    > 1. **length** 初始化为 16
->    >
->    > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
->    >
->    >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
->    >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
->    >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
->
-> 4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
->
-> 5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
->
-> 6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
+1. **threshold** 代表 **hashMap** 可以容纳的最大键值对数量( 包括 *拉链存储*  的键值对 )
+
+   ```java
+   threshold = length * loadFactor;
+   ```
+
+2. **loadFactor** 是对 ***空间和时间*** 的一个取舍
+
+   > 1. **loadFactor** 越小, 说明越早进行扩容, 即 hashMap 越大, 发生 `哈希冲突` 的概率就越小, 即性能越好. 属于空间换时间
+   > 2. **loadFactor** 越大, 则与上述相反
+
+3. **length** 是 hashMap 桶的数量
+
+   > 1. **length** 初始化为 16
+   >
+   > 2. **length** 一定是 `2 的 n 次方`, 且每次扩容为原来大小的`两倍`
+   >
+   >    > 1. 常规的方法是设置 **length** 为 `素数`, 因为素数比合数发生哈希冲突的`概率要小`
+   >    > 2. 设置 **length** 为 2的n次方, 主要是方便取模和扩容.
+   >    > 3. 同时, 为了减少 哈希冲突 的概率, java 对 `哈希寻址` 做了优化
+
+4. **size** 是 **hashMap** 中 `实际存储` 的键值对数量, 与 **length** 需要区分
+
+5. **modCount** 是 **hashMap** 结构发生变化的次数, 比如新增键值对等行为
+
+6. 当 **指定 HashMap 的容量初始化时( 例如指定 X )**, 会选择一个 `大于等于 X` 的 **2的n次方 **作为初始化的容量
 
 
 
@@ -1741,8 +1720,9 @@ new ThreadPoolExecutor(corePoolSize,
 
 2. 里氏代换原则
 
-   > + 子类的能力必须大于等于父类的能力
-   > + 对于 **返回值**, 则应该是 ***小于等于***; 对于可以抛出的异常, 也是一样的
+   > 子类的能力必须大于等于父类的能力
+   >
+   > 对于 **返回值**, 则应该是 ***小于等于***; 对于可以抛出的异常, 也是一样的
 
 3. 依赖倒转原则
 
@@ -1829,16 +1809,19 @@ new ThreadPoolExecutor(corePoolSize,
 
 1. **static 修饰方法**
 
-   > 1. 不需要**该方法的对象** 即可 `访问该方法`. 是 static 最常用的场景, 常用来实现 `工具类`
+   1. 不需要**该方法的对象** 即可 `访问该方法`. 是 static 最常用的场景, 常用来实现 `工具类`
+
+
+
 
 2. **static 修饰变量**
+   1. 该变量只分配一块 `固定的存储空间`
+   2. 相当于`全局变量`, 可以在 **任何 static 方法中访问**
 
-   > 1. 该变量只分配一块 `固定的存储空间`
-   > 2. 相当于`全局变量`, 可以在 **任何 static 方法中访问**
+
 
 3. **static 修饰类**
-
-   > 1. `只有内部类` 可以声明为 static, 此时 **该内部类** 就相当于`普通类`
+   1. `只有内部类` 可以声明为 static, 此时 **该内部类** 就相当于`普通类`
 
 ### final
 
@@ -2045,66 +2028,3 @@ new ThreadPoolExecutor(corePoolSize,
 
 
 
-## 网络
-
-### TCP 
-
-#### 为什么是三次握手而不是两次握手
-
-+ **防止过期报文传回服务器**
-
-  1. 假设客户端发送第一次连接 A, 没有收到 第二次握手 的报文
-  2. 于是又发送 第二次连接 B, 这一次正常
-
-+ **确认自己和对方的发送能力和接收能力正常**
-
-  1. 第一次握手
-  
-     > 1. **客户端 **确认自己有 `发送能力`, 服务端什么都没有
-     > 2. **服务端 **暂时确认自己和客户端都没有 `发送和接收能力`
-  
-  2. 第二次握手
-  
-     > 1. **客户端 **确认自己有 `接收能力`, 服务端有 `发送和接收能力`
-     > 2. **服务端 **确认自己有 `发送能力和接收能力` , 客户端有 `发送能力`
-  
-  3. 第三次握手
-  
-     > 1. 客户端和服务端 **都确认** 自己和对方有 `发送和接收能力`
-
-+ **确认自己的 seq 和对方的 seq**
-
-
-
-#### 两军问题
-
-+ **场景**
-
-  1. 红军和蓝军进行通信, 两者的信使都有 **一定概率失踪**
-  2. 红军和蓝军约定一起进攻白军
-  3. 红军派出信使
-  4. 蓝军收到, 并且也派出信使回复
-  5. 红军收到, 并且也派出信使回复
-  6. 蓝军收到, 并且也派出信使回复......
-  7. **因为信使存在 失踪(丢失) 的问题, 所以每一次任意一方收到信息, 都需要进行回复, 无法得到确切的消息.** 
-  8. `即 在不可靠的信道上( 信使 ), 无法建立可靠的 连接`
-
-+ **TCP 握手次数**
-  1. 根据 **两军问题** 可知,  三次握手是能保证 `双方可能进行正常通信的最少次数`
-
-
-
-#### TIME-WAIT 的作用
-
-1. 如果 **第三次挥手**, 客户端没有接收到, 因为有 `TIME-WAIT` , 所以客户端可以收到服务端 `重传的报文` , 双方得以顺利关闭连接.
-2. 经过 `TIME-WAIT` 后, 本次连接产生的全部报文都会在 **网络中消失**, 不会干扰到下一次的连接. 
-
-
-
-#### 滑动窗口
-
-
-
-### HTTP
-
-#### HTTP 和 HTTPS 的区别
