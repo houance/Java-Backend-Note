@@ -65,9 +65,7 @@
 
 # ZAB 算法
 
-
-
-*ZAB( Zookeeper Atomic Broadcast - 原子广播算法 ) 用于同步集群中的所有 Server. 使用算法需要满足两个前提( 所有写操作由 **一台服务器负责**, 集群中存在 **Leader** )*
+*ZAB( Zookeeper Atomic Broadcast - 原子广播算法 ) 用于同步集群中的所有 Server. 使用算法需要满足两个前提( 所有写操作由 **一台服务器负责**, 集群中存在  **Leader** )*
 
 
 
@@ -99,5 +97,7 @@
 4. 当 Leader 接收到**超过一半机器数量的 ACK**, 那么就认为这次写操作 同步成功, 执行 Commit 并发送 Commit 指令到 Follower
 
 5. Follower 执行 Commit
+
+
 
 # 选举和 Paxos 算法
